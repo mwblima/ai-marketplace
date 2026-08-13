@@ -1,6 +1,6 @@
 # ADR-0010 — Versioning, release tags, and SHA pinning
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-12
 
 ## Context
@@ -49,8 +49,12 @@ repository itself (ADR-0002) — tags are read from the marketplace repository.
 - The release ritual is one command, which is essential for non-platform teams to publish
   without reading documentation.
 - Cost: tagging discipline. An artifact whose `version` rises without a matching tag becomes a
-  silent inconsistency — CI should warn when `version` changes in a PR without a corresponding
-  tag at merge.
+  silent inconsistency, so invariant I10 checks it: a warning normally, and a hard error when
+  another artifact constrains that one by semver range, because the constraint then cannot
+  resolve and silently falls back to the marketplace's current copy.
+- The marketplace entry carries `version` as well as `plugin.json`. `claude plugin tag` refuses
+  to tag a release unless the two agree, so omitting it from the generated entry makes the
+  documented release command unusable.
 - Writing the SHA-pin rule before needing it avoids the "just this once, it is a trusted repo"
   argument on the first concrete case.
 

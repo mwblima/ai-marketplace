@@ -30,7 +30,7 @@ and mark the old one `Superseded by ADR-XXXX`.
 | [0007](0007-guardrails-and-atomicity.md) | Quality guardrails and artifact atomicity | Proposed |
 | [0008](0008-static-site-on-github-pages.md) | Static site on GitHub Pages, no framework | Proposed |
 | [0009](0009-distribution-via-managed-settings.md) | Distribution and enforcement via managed settings | Proposed |
-| [0010](0010-versioning-and-releases.md) | Versioning, release tags, and SHA pinning | Proposed |
+| [0010](0010-versioning-and-releases.md) | Versioning, release tags, and SHA pinning | Accepted |
 | [0011](0011-catalog-is-the-only-definition-point.md) | The catalog entry is the only place an artifact is defined | Accepted |
 
 ## Note for adopters
