@@ -1,0 +1,42 @@
+name: CI
+
+# Deterministic guardrails (ADR-0007, layers 1 and 2). Everything here runs in seconds.
+# What cannot be checked mechanically lives in .github/policy/ and is reviewed by a human
+# against the structured checklist in the PR template.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the name-immutability check (I1) can diff against the base ref.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Generated files must match the catalog. This is what stops someone from
+      # hand-editing marketplace.json and silently diverging from the source of truth.
+      - name: Check generated files are up to date
+        run: node scripts/build.mjs --check
+
+      - name: Validate catalog and artifacts
+        run: node scripts/validate.mjs
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
+
+      - name: Check multi-tool projection builds
+        run: node scripts/build-targets.mjs

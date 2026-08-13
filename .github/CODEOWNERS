@@ -1,0 +1,20 @@
+# Ownership routing (ADR-0003). The catalog directory boundary is the review boundary,
+# and `owner_team` in a catalog entry must correspond to a team listed here (invariant I8).
+
+# Governance surface: the model itself.
+/docs/adr/                    @acme/platform
+/.github/                     @acme/platform
+/scripts/                     @acme/platform
+/marketplace.config.json      @acme/platform
+
+# Generated. Never edited by hand; CI verifies it matches the catalog.
+/.claude-plugin/              @acme/platform
+/docs/data/                   @acme/platform
+
+# Company-scope artifacts.
+/catalog/company/             @acme/platform
+/catalog/packs/               @acme/platform
+
+# Area and team artifacts.
+/catalog/engineering/backend/ @acme/backend
+/catalog/engineering/data/    @acme/data

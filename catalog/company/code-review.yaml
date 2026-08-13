@@ -1,0 +1,17 @@
+# Company-scope artifact: available to everyone, owned by the platform team.
+# The path under catalog/ defines ownership and routes review via CODEOWNERS (ADR-0003).
+name: code-review
+displayName: Code Review
+version: 1.0.0
+description: >-
+  Review a pull request or working-tree diff against the company engineering standards,
+  reporting correctness bugs, missing tests, and security issues with file and line
+  references. Use before requesting human review on any change.
+category: development
+scope: company
+owner_team: platform
+maturity: supported
+data_classification: internal
+tools: [claude, codex, cursor]
+artifact_types: [skill]
+keywords: [review, pr, pull request, diff, code quality, standards]

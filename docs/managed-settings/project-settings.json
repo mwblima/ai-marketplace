@@ -1,0 +1,16 @@
+{
+  "_comment": "Commit as .claude/settings.json in a team repository. See ../adr/0009-distribution-via-managed-settings.md",
+
+  "extraKnownMarketplaces": {
+    "acme": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/ai-marketplace"
+      }
+    }
+  },
+
+  "enabledPlugins": {
+    "pack-backend@acme": true
+  }
+}

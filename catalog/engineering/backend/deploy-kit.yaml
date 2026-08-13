@@ -1,0 +1,15 @@
+name: deploy-kit
+displayName: Deploy Kit
+version: 2.1.0
+description: >-
+  Prepare and verify a service deployment: check the release checklist, confirm migrations
+  are backward compatible, and produce the rollout and rollback plan. Use when shipping a
+  backend service to staging or production.
+category: deployment
+scope: team
+owner_team: backend
+maturity: supported
+data_classification: internal
+tools: [claude, codex, cursor]
+artifact_types: [skill]
+keywords: [deploy, release, rollout, rollback, migration, staging, production]

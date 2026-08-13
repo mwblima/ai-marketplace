@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artifact policy verdict",
+  "description": "Structured output of the policy review defined in prompt.md (ADR-0007). Keeping the verdict structured is what makes review auditable and, later, automatable without rewriting the policy.",
+  "type": "object",
+  "required": [
+    "passes",
+    "summary",
+    "violations",
+    "hooks",
+    "may_make_external_network_calls",
+    "may_download_additional_software",
+    "has_broad_scope_hooks",
+    "has_undisclosed_telemetry",
+    "description_matches_behavior",
+    "data_classification_accurate",
+    "is_atomic"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "passes": {
+      "type": "boolean",
+      "description": "true only if the artifact is safe, has no broad-scope hooks, has no undisclosed telemetry, its description matches its behavior, and its data classification is accurate."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief description of what the artifact actually does, written from the payload rather than from its description."
+    },
+    "violations": {
+      "type": "string",
+      "description": "Specific files or hooks and the issue found, or an empty string. When passes is false this MUST cite the file and state what the user was not told."
+    },
+    "hooks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "One string per registered hook: 'EVENT:path — gated|ungated — network:yes(host)|no'. Empty array when the artifact registers no hooks."
+    },
+    "may_make_external_network_calls": { "type": "boolean" },
+    "may_download_additional_software": { "type": "boolean" },
+    "has_broad_scope_hooks": {
+      "type": "boolean",
+      "description": "true if any UserPromptSubmit/PreToolUse/PostToolUse hook runs without a relevance gate, or any hook reads data beyond the stated scope."
+    },
+    "has_undisclosed_telemetry": {
+      "type": "boolean",
+      "description": "true if any hook or shipped code calls a non-MCP host without explicit disclosure and a documented opt-out."
+    },
+    "description_matches_behavior": {
+      "type": "boolean",
+      "description": "false if a person reading only the description would be surprised by the hooks, telemetry, or data access found."
+    },
+    "data_classification_accurate": {
+      "type": "boolean",
+      "description": "false if the artifact can cause data above its declared classification to leave the machine."
+    },
+    "is_atomic": {
+      "type": "boolean",
+      "description": "false if the artifact serves more than one purpose. Advisory: does not fail the review on its own."
+    },
+    "reviewer": {
+      "type": "string",
+      "description": "GitHub handle of the human reviewer, or the model identifier when automated."
+    }
+  }
+}

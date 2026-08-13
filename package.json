@@ -1,0 +1,21 @@
+{
+  "name": "ai-marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A governance model for sharing AI artifacts (skills, agents, MCP servers, hooks) across a company.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "check": "node scripts/build.mjs --check && node scripts/validate.mjs",
+    "targets": "node scripts/build-targets.mjs",
+    "ci": "npm run build && npm run validate && npm run targets",
+    "serve": "npm run build && node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

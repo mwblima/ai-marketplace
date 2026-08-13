@@ -1,0 +1,9 @@
+{
+  "name": "deploy-kit",
+  "version": "2.1.0",
+  "description": "Prepare and verify a service deployment: check the release checklist, confirm migrations are backward compatible, and produce the rollout and rollback plan. Use when shipping a backend service to staging or production.",
+  "author": {
+    "name": "Backend Engineering",
+    "email": "backend@acme.example"
+  }
+}

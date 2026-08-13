@@ -1,0 +1,21 @@
+# A pack is a meta-plugin: a manifest of nothing but dependencies (ADR-0005).
+# Installing it resolves and installs every artifact listed below.
+#
+# This one is the company baseline. It goes into `enabledPlugins` in managed settings
+# (ADR-0009), so a new machine arrives with it already enabled.
+name: pack-onboarding
+displayName: Onboarding Pack
+version: 1.0.0
+kind: pack
+description: >-
+  The baseline set of AI artifacts every engineer at the company gets by default. Install
+  this first; team-specific packs build on top of it.
+category: productivity
+scope: company
+owner_team: platform
+maturity: supported
+data_classification: internal
+tools: [claude]
+keywords: [onboarding, baseline, default, starter]
+dependencies:
+  - code-review

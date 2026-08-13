@@ -1,0 +1,12 @@
+{
+  "name": "pack-backend",
+  "version": "1.0.0",
+  "description": "Standard artifact set for backend engineers: code review plus the deployment workflow. Install this when you join a backend team.",
+  "dependencies": [
+    "code-review",
+    {
+      "name": "deploy-kit",
+      "version": "^2.0.0"
+    }
+  ]
+}

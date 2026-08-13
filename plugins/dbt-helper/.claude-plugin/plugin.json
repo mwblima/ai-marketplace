@@ -1,0 +1,9 @@
+{
+  "name": "dbt-helper",
+  "version": "0.2.0",
+  "description": "Write and review dbt models following the data team's layering and naming conventions, including tests and documentation for every new model. Use when adding or changing a model in the analytics repository.",
+  "author": {
+    "name": "Data Engineering",
+    "email": "data@acme.example"
+  }
+}

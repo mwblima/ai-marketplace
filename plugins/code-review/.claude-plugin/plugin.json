@@ -1,0 +1,9 @@
+{
+  "name": "code-review",
+  "version": "1.0.0",
+  "description": "Review a pull request or working-tree diff against the company engineering standards, reporting correctness bugs, missing tests, and security issues with file and line references. Use before requesting human review on any change.",
+  "author": {
+    "name": "Platform Engineering",
+    "email": "platform@acme.example"
+  }
+}

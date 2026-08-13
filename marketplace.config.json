@@ -1,0 +1,49 @@
+{
+  "marketplace": {
+    "name": "acme",
+    "description": "Internal catalog of AI artifacts: skills, agents, MCP servers, and hooks shared across the company.",
+    "owner": {
+      "name": "Platform Engineering",
+      "email": "platform@acme.example"
+    },
+    "allowCrossMarketplaceDependenciesOn": []
+  },
+  "site": {
+    "title": "Acme AI Marketplace",
+    "tagline": "Skills, agents and MCP servers, versioned and shared across the company.",
+    "repoUrl": "https://github.com/acme/ai-marketplace"
+  },
+  "catalogRoot": "catalog",
+  "pluginsRoot": "plugins",
+
+  "teams": {
+    "platform": { "name": "Platform Engineering", "email": "platform@acme.example" },
+    "backend": { "name": "Backend Engineering", "email": "backend@acme.example" },
+    "data": { "name": "Data Engineering", "email": "data@acme.example" }
+  },
+
+  "policy": {
+    "allowedMcpHosts": [
+      "mcp.internal.acme.example",
+      "localhost"
+    ],
+    "categories": [
+      "development",
+      "productivity",
+      "security",
+      "data",
+      "monitoring",
+      "design",
+      "testing",
+      "deployment"
+    ],
+    "scopes": ["company", "area", "team"],
+    "maturities": ["experimental", "supported", "deprecated"],
+    "tools": ["claude", "codex", "cursor"],
+    "dataClassifications": ["public", "internal", "confidential"],
+    "descriptionMinLength": 40,
+    "descriptionMaxLength": 400,
+    "skillMaxLines": 500,
+    "maxSkillsPerPlugin": 5
+  }
+}

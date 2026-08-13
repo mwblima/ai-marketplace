@@ -1,0 +1,94 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "acme",
+  "description": "Internal catalog of AI artifacts: skills, agents, MCP servers, and hooks shared across the company.",
+  "owner": {
+    "name": "Platform Engineering",
+    "email": "platform@acme.example"
+  },
+  "allowCrossMarketplaceDependenciesOn": [],
+  "plugins": [
+    {
+      "name": "code-review",
+      "description": "Review a pull request or working-tree diff against the company engineering standards, reporting correctness bugs, missing tests, and security issues with file and line references. Use before requesting human review on any change.",
+      "source": "./plugins/code-review",
+      "category": "development",
+      "displayName": "Code Review",
+      "keywords": [
+        "review",
+        "pr",
+        "pull request",
+        "diff",
+        "code quality",
+        "standards"
+      ]
+    },
+    {
+      "name": "dbt-helper",
+      "description": "Write and review dbt models following the data team's layering and naming conventions, including tests and documentation for every new model. Use when adding or changing a model in the analytics repository.",
+      "source": "./plugins/dbt-helper",
+      "category": "data",
+      "displayName": "dbt Helper",
+      "keywords": [
+        "dbt",
+        "analytics",
+        "sql",
+        "model",
+        "warehouse",
+        "transformation"
+      ]
+    },
+    {
+      "name": "deploy-kit",
+      "description": "Prepare and verify a service deployment: check the release checklist, confirm migrations are backward compatible, and produce the rollout and rollback plan. Use when shipping a backend service to staging or production.",
+      "source": "./plugins/deploy-kit",
+      "category": "deployment",
+      "displayName": "Deploy Kit",
+      "keywords": [
+        "deploy",
+        "release",
+        "rollout",
+        "rollback",
+        "migration",
+        "staging",
+        "production"
+      ]
+    },
+    {
+      "name": "pack-backend",
+      "description": "Standard artifact set for backend engineers: code review plus the deployment workflow. Install this when you join a backend team.",
+      "source": "./plugins/pack-backend",
+      "category": "productivity",
+      "displayName": "Backend Pack",
+      "keywords": [
+        "backend",
+        "team pack",
+        "standard set",
+        "services"
+      ],
+      "dependencies": [
+        "code-review",
+        {
+          "name": "deploy-kit",
+          "version": "^2.0.0"
+        }
+      ]
+    },
+    {
+      "name": "pack-onboarding",
+      "description": "The baseline set of AI artifacts every engineer at the company gets by default. Install this first; team-specific packs build on top of it.",
+      "source": "./plugins/pack-onboarding",
+      "category": "productivity",
+      "displayName": "Onboarding Pack",
+      "keywords": [
+        "onboarding",
+        "baseline",
+        "default",
+        "starter"
+      ],
+      "dependencies": [
+        "code-review"
+      ]
+    }
+  ]
+}

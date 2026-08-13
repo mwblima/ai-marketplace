@@ -1,0 +1,19 @@
+{
+  "extraKnownMarketplaces": {
+    "acme": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/ai-marketplace"
+      }
+    }
+  },
+
+  "strictKnownMarketplaces": [
+    { "source": "github", "repo": "your-org/ai-marketplace" },
+    { "source": "github", "repo": "anthropics/claude-plugins-official" }
+  ],
+
+  "enabledPlugins": {
+    "pack-onboarding@acme": true
+  }
+}

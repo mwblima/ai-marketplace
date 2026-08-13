@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Marketplace</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>🧩</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="wrap">
+        <h1 id="site-title">AI Marketplace</h1>
+        <p id="site-tagline" class="tagline"></p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div class="search-row">
+        <input
+          id="q"
+          type="search"
+          autocomplete="off"
+          placeholder="Search by name or description…"
+          aria-label="Search artifacts"
+        />
+        <span id="count" class="count" aria-live="polite"></span>
+      </div>
+
+      <div id="facets" class="facets"></div>
+
+      <ul id="results" class="results"></ul>
+      <p id="empty" class="empty" hidden>
+        No artifact matches that search. Try a single word, or clear the filters.
+      </p>
+    </main>
+
+    <div id="detail" class="detail" hidden role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <div class="detail-panel">
+        <button id="detail-close" class="close" aria-label="Close">&times;</button>
+        <div id="detail-body"></div>
+      </div>
+    </div>
+
+    <footer class="wrap foot">
+      <p>
+        Generated from <code>catalog/</code> — never edited by hand.
+        <a id="repo-link" href="#">Repository</a> ·
+        <a id="adr-link" href="#">Architecture decisions</a>
+      </p>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

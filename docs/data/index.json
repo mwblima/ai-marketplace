@@ -1,0 +1,175 @@
+{
+  "generatedAt": null,
+  "marketplace": {
+    "name": "acme",
+    "title": "Acme AI Marketplace",
+    "tagline": "Skills, agents and MCP servers, versioned and shared across the company.",
+    "repoUrl": "https://github.com/acme/ai-marketplace"
+  },
+  "artifacts": [
+    {
+      "name": "code-review",
+      "displayName": "Code Review",
+      "description": "Review a pull request or working-tree diff against the company engineering standards, reporting correctness bugs, missing tests, and security issues with file and line references. Use before requesting human review on any change.",
+      "category": "development",
+      "kind": "plugin",
+      "scope": "company",
+      "area": "company",
+      "team": null,
+      "owner_team": "platform",
+      "maturity": "supported",
+      "tools": [
+        "claude",
+        "codex",
+        "cursor"
+      ],
+      "keywords": [
+        "review",
+        "pr",
+        "pull request",
+        "diff",
+        "code quality",
+        "standards"
+      ],
+      "artifact_types": [
+        "skill"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "dependencies": [],
+      "version": "1.0.0",
+      "homepage": null,
+      "sourcePath": "plugins/code-review"
+    },
+    {
+      "name": "dbt-helper",
+      "displayName": "dbt Helper",
+      "description": "Write and review dbt models following the data team's layering and naming conventions, including tests and documentation for every new model. Use when adding or changing a model in the analytics repository.",
+      "category": "data",
+      "kind": "plugin",
+      "scope": "team",
+      "area": "engineering",
+      "team": "data",
+      "owner_team": "data",
+      "maturity": "experimental",
+      "tools": [
+        "claude",
+        "codex",
+        "cursor"
+      ],
+      "keywords": [
+        "dbt",
+        "analytics",
+        "sql",
+        "model",
+        "warehouse",
+        "transformation"
+      ],
+      "artifact_types": [
+        "skill"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "dependencies": [],
+      "version": "0.2.0",
+      "homepage": null,
+      "sourcePath": "plugins/dbt-helper"
+    },
+    {
+      "name": "deploy-kit",
+      "displayName": "Deploy Kit",
+      "description": "Prepare and verify a service deployment: check the release checklist, confirm migrations are backward compatible, and produce the rollout and rollback plan. Use when shipping a backend service to staging or production.",
+      "category": "deployment",
+      "kind": "plugin",
+      "scope": "team",
+      "area": "engineering",
+      "team": "backend",
+      "owner_team": "backend",
+      "maturity": "supported",
+      "tools": [
+        "claude",
+        "codex",
+        "cursor"
+      ],
+      "keywords": [
+        "deploy",
+        "release",
+        "rollout",
+        "rollback",
+        "migration",
+        "staging",
+        "production"
+      ],
+      "artifact_types": [
+        "skill"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "dependencies": [],
+      "version": "2.1.0",
+      "homepage": null,
+      "sourcePath": "plugins/deploy-kit"
+    },
+    {
+      "name": "pack-backend",
+      "displayName": "Backend Pack",
+      "description": "Standard artifact set for backend engineers: code review plus the deployment workflow. Install this when you join a backend team.",
+      "category": "productivity",
+      "kind": "pack",
+      "scope": "team",
+      "area": "packs",
+      "team": null,
+      "owner_team": "backend",
+      "maturity": "supported",
+      "tools": [
+        "claude"
+      ],
+      "keywords": [
+        "backend",
+        "team pack",
+        "standard set",
+        "services"
+      ],
+      "artifact_types": [],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "dependencies": [
+        "code-review",
+        "deploy-kit"
+      ],
+      "version": "1.0.0",
+      "homepage": null,
+      "sourcePath": "plugins/pack-backend"
+    },
+    {
+      "name": "pack-onboarding",
+      "displayName": "Onboarding Pack",
+      "description": "The baseline set of AI artifacts every engineer at the company gets by default. Install this first; team-specific packs build on top of it.",
+      "category": "productivity",
+      "kind": "pack",
+      "scope": "company",
+      "area": "packs",
+      "team": null,
+      "owner_team": "platform",
+      "maturity": "supported",
+      "tools": [
+        "claude"
+      ],
+      "keywords": [
+        "onboarding",
+        "baseline",
+        "default",
+        "starter"
+      ],
+      "artifact_types": [],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "dependencies": [
+        "code-review"
+      ],
+      "version": "1.0.0",
+      "homepage": null,
+      "sourcePath": "plugins/pack-onboarding"
+    }
+  ]
+}

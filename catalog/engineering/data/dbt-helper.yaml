@@ -1,0 +1,15 @@
+name: dbt-helper
+displayName: dbt Helper
+version: 0.2.0
+description: >-
+  Write and review dbt models following the data team's layering and naming conventions,
+  including tests and documentation for every new model. Use when adding or changing a
+  model in the analytics repository.
+category: data
+scope: team
+owner_team: data
+maturity: experimental
+data_classification: internal
+tools: [claude, codex, cursor]
+artifact_types: [skill]
+keywords: [dbt, analytics, sql, model, warehouse, transformation]

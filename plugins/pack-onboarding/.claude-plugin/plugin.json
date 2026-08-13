@@ -1,0 +1,8 @@
+{
+  "name": "pack-onboarding",
+  "version": "1.0.0",
+  "description": "The baseline set of AI artifacts every engineer at the company gets by default. Install this first; team-specific packs build on top of it.",
+  "dependencies": [
+    "code-review"
+  ]
+}
