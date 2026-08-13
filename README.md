@@ -49,26 +49,80 @@ generated file is out of sync — so the JSON can never be hand-edited into dive
 
 ### Claude Code
 
+Register the marketplace once, then install what you need:
+
 ```bash
 claude plugin marketplace add your-org/ai-marketplace
+```
+
+```bash
 claude plugin install pack-onboarding@acme
 ```
 
-A pack is a plugin manifest containing nothing but a `dependencies` array. Installing it
-resolves and installs everything in it — native behavior, no custom installer (ADR-0005).
+`acme` is the marketplace name from `marketplace.config.json`, not the repository name —
+it is what appears after the `@` in every install command.
+
+Browsing and installing interactively works too: run `/plugin` inside Claude Code and go to
+**Discover**.
+
+**A pack installs everything in it.** A pack is a plugin manifest containing nothing but a
+`dependencies` array, so this is native client behavior with no custom installer (ADR-0005):
+
+```
+✔ Successfully installed plugin: pack-backend@acme (+ 2 dependencies: deploy-kit, code-review)
+```
+
+Artifacts inside a pack remain individually installable — `claude plugin install
+deploy-kit@acme` works on its own, and installing the pack afterwards does not duplicate it.
+Disabling an artifact that a pack still needs is refused, with the correct chained command
+in the error.
+
+Other useful commands:
+
+```bash
+claude plugin marketplace list      # which marketplaces are registered
+claude plugin marketplace update    # refresh the catalog after new artifacts are published
+claude plugin list                  # what is installed, and any load errors
+claude plugin uninstall pack-backend@acme --prune   # remove it and its orphaned dependencies
+```
+
+#### Trying it before publishing
+
+Any local git repository works as a marketplace source, which is the fastest way to test a
+change end to end:
+
+```bash
+claude plugin marketplace add /absolute/path/to/ai-marketplace
+```
+
+The directory must be a git repository with the changes committed — the client reads the
+committed tree, not the working directory.
 
 ### Codex and Cursor
 
 `SKILL.md` is byte-identical across all three tools, so skills are copied rather than
-translated (ADR-0004):
+translated (ADR-0004). There is no marketplace client outside Claude Code, so installation is
+a clone plus a symlink:
 
 ```bash
 git clone https://github.com/your-org/ai-marketplace
-./ai-marketplace/dist/codex/install.sh     # symlinks into ~/.agents/skills
-./ai-marketplace/dist/cursor/install.sh    # symlinks into ~/.cursor/skills
+cd ai-marketplace
 ```
 
-Symlinks, not copies — `git pull` then updates every artifact in place.
+```bash
+./dist/codex/install.sh      # links into ~/.agents/skills
+```
+
+```bash
+./dist/cursor/install.sh     # links into ~/.cursor/skills
+```
+
+Pass a different destination as the first argument — for example `/etc/codex/skills` for the
+admin scope, or a repository's `.agents/skills` to scope the artifacts to one project.
+
+Symlinks, not copies, so `git pull` updates every installed skill in place with no second
+step. Only skills project — packs, hooks, commands, and MCP configuration do not. Full
+detail and per-tool discovery paths: [docs/adoption/other-tools.md](docs/adoption/other-tools.md).
 
 ## Publishing an artifact
 
