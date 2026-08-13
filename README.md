@@ -159,26 +159,27 @@ Three layers, cheapest first (ADR-0007):
 3. **Policy review** — [`.github/policy/prompt.md`](.github/policy/prompt.md) with a
    structured verdict in [`schema.json`](.github/policy/schema.json), covering what a script
    cannot judge: hook scope, undisclosed telemetry, whether the description matches actual
-   behavior. Performed by a human in v1; the prompt is written so it can be automated later
-   without being rewritten.
+   behavior. Performed by a human against the PR checklist.
+   [`.github/policy/README.md`](.github/policy/README.md) gives three automation paths —
+   reviewer assist, advisory CI, blocking check — with the failure modes to design for
+   before each one. Writing the policy before automating it is the intended order: a policy
+   you have applied by hand a dozen times is one you can trust a model to apply.
 
 Distribution and enforcement — automatic marketplace registration, default-enabled packs,
 and restricting which marketplaces can be added at all — are covered in
 [ADR-0009](docs/adr/0009-distribution-via-managed-settings.md) with ready-to-apply files
 under [`docs/managed-settings/`](docs/managed-settings/).
 
-## Adopting this privately
+## Adopting it
 
-Running this inside a company changes three things. Read these before rollout:
+Fork it, strip the examples, publish one artifact a team already wanted. About an afternoon.
 
-| Concern | Where |
-|---|---|
-| Private repos change which **plugin sources** are reachable | [ADR-0002](docs/adr/0002-adopt-anthropic-marketplace-format.md) |
-| GitHub Pages with private visibility needs Enterprise Cloud — and publishing a public site from a private repo leaks the catalog | [ADR-0008](docs/adr/0008-static-site-on-github-pages.md) |
-| MDM distribution, and what still works without MDM | [ADR-0009](docs/adr/0009-distribution-via-managed-settings.md) |
+**→ [docs/adoption/README.md](docs/adoption/README.md)** walks through it, including the two
+decisions that are expensive to reverse (the marketplace name, and repository visibility)
+and which parts of the model are meant to be changed per company.
 
-Then: replace `marketplace.config.json`, delete the example artifacts under `catalog/` and
-`plugins/`, and rewrite `.github/CODEOWNERS` for your org.
+The example artifacts are fictional but written as real ones, so you can see what a good
+`SKILL.md` looks like before deleting them.
 
 ## Design decisions
 
