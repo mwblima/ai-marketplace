@@ -93,6 +93,57 @@ try {
   // the check is advisory on a repo with no history to compare against.
 }
 
+// ── I10: a declared version must have a release tag ─────────────────────────────
+// Version resolution reads git tags shaped `{plugin-name}--v{version}` (ADR-0010). A
+// version declared in the catalog with no matching tag cannot be the target of a semver
+// constraint, so a pack pinning it silently falls back to "whatever is in the marketplace
+// right now" — the exact thing constraints exist to prevent.
+//
+// This is a warning, not an error: the tag is pushed after merge, so the PR that raises a
+// version legitimately has no tag yet. It fails only when another artifact constrains it.
+// "git failed" and "no tags yet" are different states and must not be conflated: the
+// second one still needs checking, because a repository with zero tags is exactly where a
+// semver constraint silently fails to resolve.
+let tags = null;
+try {
+  tags = new Set(
+    execFileSync("git", ["tag", "--list"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
+      .split("\n")
+      .filter(Boolean),
+  );
+} catch {
+  // Not a git repository, or git unavailable. Skip the check rather than fail the build.
+}
+
+const constrained = new Set();
+for (const e of catalog) {
+  for (const dep of e.dependencies ?? []) {
+    if (typeof dep === "object" && dep.version) constrained.add(dep.name);
+  }
+}
+
+for (const e of catalog) {
+  if (!e.version || tags === null) continue;
+  if (tags.has(`${e.name}--v${e.version}`)) continue;
+
+  if (constrained.has(e.name)) {
+    fail(
+      "I10",
+      e._file,
+      `version ${e.version} has no tag \`${e.name}--v${e.version}\`, but another artifact ` +
+        `constrains this one by semver range. The constraint cannot resolve. ` +
+        `Run \`claude plugin tag --push\` from ${config.pluginsRoot}/${e.name}/.`,
+    );
+  } else {
+    warn(
+      "I10",
+      e._file,
+      `version ${e.version} has no release tag yet. After merge, run \`claude plugin tag --push\` ` +
+        `from ${config.pluginsRoot}/${e.name}/ (ADR-0010).`,
+    );
+  }
+}
+
 // ── I8: owner_team is a real team in CODEOWNERS ─────────────────────────────────
 const codeownersPath = join(ROOT, ".github/CODEOWNERS");
 const codeowners = existsSync(codeownersPath) ? readFileSync(codeownersPath, "utf8") : "";

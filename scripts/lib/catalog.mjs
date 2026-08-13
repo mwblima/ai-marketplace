@@ -94,6 +94,9 @@ export function toMarketplaceEntry(config, entry) {
     source: `./${config.pluginsRoot}/${entry.name}`,
     category: entry.category,
   };
+  // `claude plugin tag` refuses to tag a release unless plugin.json and the marketplace
+  // entry agree on the version, so the entry has to carry it (ADR-0010).
+  if (entry.version) out.version = entry.version;
   if (entry.displayName) out.displayName = entry.displayName;
   if (entry.homepage) out.homepage = entry.homepage;
   if (entry.keywords?.length) out.keywords = entry.keywords;

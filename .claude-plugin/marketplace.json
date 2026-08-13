@@ -13,6 +13,7 @@
       "description": "Review a pull request or working-tree diff against the company engineering standards, reporting correctness bugs, missing tests, and security issues with file and line references. Use before requesting human review on any change.",
       "source": "./plugins/code-review",
       "category": "development",
+      "version": "1.0.0",
       "displayName": "Code Review",
       "keywords": [
         "review",
@@ -28,6 +29,7 @@
       "description": "Write and review dbt models following the data team's layering and naming conventions, including tests and documentation for every new model. Use when adding or changing a model in the analytics repository.",
       "source": "./plugins/dbt-helper",
       "category": "data",
+      "version": "0.2.0",
       "displayName": "dbt Helper",
       "keywords": [
         "dbt",
@@ -43,6 +45,7 @@
       "description": "Prepare and verify a service deployment: check the release checklist, confirm migrations are backward compatible, and produce the rollout and rollback plan. Use when shipping a backend service to staging or production.",
       "source": "./plugins/deploy-kit",
       "category": "deployment",
+      "version": "2.1.0",
       "displayName": "Deploy Kit",
       "keywords": [
         "deploy",
@@ -59,6 +62,7 @@
       "description": "Standard artifact set for backend engineers: code review plus the deployment workflow. Install this when you join a backend team.",
       "source": "./plugins/pack-backend",
       "category": "productivity",
+      "version": "1.0.0",
       "displayName": "Backend Pack",
       "keywords": [
         "backend",
@@ -79,6 +83,7 @@
       "description": "The baseline set of AI artifacts every engineer at the company gets by default. Install this first; team-specific packs build on top of it.",
       "source": "./plugins/pack-onboarding",
       "category": "productivity",
+      "version": "1.0.0",
       "displayName": "Onboarding Pack",
       "keywords": [
         "onboarding",
