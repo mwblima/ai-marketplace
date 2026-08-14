@@ -157,6 +157,21 @@ for (const pack of packs) {
   );
 }
 
+// ── AGENTS.md ───────────────────────────────────────────────────────────────────
+// Claude Code reads CLAUDE.md; Codex and several other tools read AGENTS.md. Keeping two
+// hand-maintained copies of the same guidance is the drift this whole repository argues
+// against, so the second one is generated from the first.
+if (existsSync(join(ROOT, "CLAUDE.md"))) {
+  const guidance = await readFile(join(ROOT, "CLAUDE.md"), "utf8");
+  await emit(
+    "AGENTS.md",
+    guidance.replace(
+      /^(# .*\n)/,
+      "$1\n<!-- Generated from CLAUDE.md by scripts/build.mjs. Edit CLAUDE.md instead. -->\n",
+    ),
+  );
+}
+
 // ── site index ──────────────────────────────────────────────────────────────────
 const index = {
   generatedAt: null, // intentionally omitted: a timestamp would make every build dirty

@@ -38,6 +38,9 @@ Reviewed against `.github/policy/prompt.md`. Verdict shape is `.github/policy/sc
 
 ## Author checklist
 
+<!-- Full walkthrough and invariant reference: CONTRIBUTING.md -->
+
+
 - [ ] `npm run ci` passes locally.
 - [ ] The description says **when to use** the artifact, in the words someone would search
       for. It is both the search field and the model's activation trigger (ADR-0006).

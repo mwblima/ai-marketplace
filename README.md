@@ -165,7 +165,14 @@ detail and per-tool discovery paths: [docs/adoption/other-tools.md](docs/adoptio
 
 ## Publishing an artifact
 
-You write **two things**, and the build produces the rest (ADR-0011):
+**Full walkthrough: [CONTRIBUTING.md](CONTRIBUTING.md)** — exact templates, the complete
+catalog field reference, and every CI invariant with its fix. It is written to be followed
+literally, including by an AI assistant helping someone build an artifact.
+
+The repository also ships [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md) at the root,
+so an assistant working here picks up the rules that matter without being told.
+
+The short version — you write **two things**, and the build produces the rest (ADR-0011):
 
 1. `catalog/<area>/<team>/<name>.yaml` — one file per artifact. The path determines the
    owner and routes review through `CODEOWNERS`. This is where the name, version, and
