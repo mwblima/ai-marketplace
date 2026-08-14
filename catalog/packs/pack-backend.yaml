@@ -9,6 +9,7 @@ category: productivity
 scope: team
 owner_team: backend
 maturity: supported
+last_reviewed: 2026-08-13
 data_classification: internal
 tools: [claude]
 keywords: [backend, team pack, standard set, services]

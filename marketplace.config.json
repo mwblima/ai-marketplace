@@ -6,7 +6,8 @@
       "name": "Platform Engineering",
       "email": "platform@acme.example"
     },
-    "allowCrossMarketplaceDependenciesOn": []
+    "allowCrossMarketplaceDependenciesOn": [],
+    "renames": {}
   },
   "site": {
     "title": "Acme AI Marketplace",
@@ -19,7 +20,8 @@
   "teams": {
     "platform": { "name": "Platform Engineering", "email": "platform@acme.example" },
     "backend": { "name": "Backend Engineering", "email": "backend@acme.example" },
-    "data": { "name": "Data Engineering", "email": "data@acme.example" }
+    "data": { "name": "Data Engineering", "email": "data@acme.example" },
+    "support": { "name": "Customer Support", "email": "support@acme.example" }
   },
 
   "policy": {
@@ -27,6 +29,7 @@
       "mcp.internal.acme.example",
       "localhost"
     ],
+    "allowedPluginRepos": [],
     "categories": [
       "development",
       "productivity",
@@ -35,7 +38,9 @@
       "monitoring",
       "design",
       "testing",
-      "deployment"
+      "deployment",
+      "operations",
+      "communication"
     ],
     "scopes": ["company", "area", "team"],
     "maturities": ["experimental", "supported", "deprecated"],
@@ -44,6 +49,7 @@
     "descriptionMinLength": 40,
     "descriptionMaxLength": 400,
     "skillMaxLines": 500,
-    "maxSkillsPerPlugin": 5
+    "maxSkillsPerPlugin": 5,
+    "reviewMaxAgeDays": 180
   }
 }

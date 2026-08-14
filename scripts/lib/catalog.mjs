@@ -4,6 +4,10 @@
  * The catalog is the single source of truth (ADR-0003). Every other artifact in the
  * repository — .claude-plugin/marketplace.json, generated pack manifests, and the site
  * index — is derived from it by scripts/build.mjs.
+ *
+ * Every entry point takes an optional `root`, defaulting to this repository. That is what
+ * lets tests/invariants.test.mjs run the real validator against synthetic repositories
+ * instead of asserting on this one (ADR-0007).
  */
 
 import { readFile, readdir } from "node:fs/promises";
@@ -23,11 +27,21 @@ export const GOVERNANCE_FIELDS = [
   "data_classification",
   "artifact_types",
   "superseded_by",
+  "last_reviewed",
   "kind",
 ];
 
-export async function loadConfig() {
-  return JSON.parse(await readFile(join(ROOT, "marketplace.config.json"), "utf8"));
+/** Artifact surfaces a plugin can ship, and where each one lives (ADR-0012). */
+export const ARTIFACT_SURFACES = {
+  skill: { dir: "skills", kind: "dir" },
+  agent: { dir: "agents", kind: "dir" },
+  command: { dir: "commands", kind: "dir" },
+  hook: { dir: "hooks", kind: "dir" },
+  mcp: { dir: ".mcp.json", kind: "file" },
+};
+
+export async function loadConfig(root = ROOT) {
+  return JSON.parse(await readFile(join(root, "marketplace.config.json"), "utf8"));
 }
 
 async function walk(dir) {
@@ -48,14 +62,14 @@ async function walk(dir) {
  *   catalog/engineering/backend/x.yaml -> { area: "engineering", team: "backend" }
  *   catalog/packs/x.yaml               -> { area: "packs", team: null }
  */
-function locationFromPath(catalogRoot, file) {
-  const parts = relative(join(ROOT, catalogRoot), file).split(sep);
+function locationFromPath(root, catalogRoot, file) {
+  const parts = relative(join(root, catalogRoot), file).split(sep);
   parts.pop();
   return { area: parts[0] ?? null, team: parts[1] ?? null };
 }
 
-export async function loadCatalog(config) {
-  const catalogDir = join(ROOT, config.catalogRoot);
+export async function loadCatalog(config, root = ROOT) {
+  const catalogDir = join(root, config.catalogRoot);
   if (!existsSync(catalogDir)) return [];
 
   const entries = [];
@@ -64,21 +78,30 @@ export async function loadCatalog(config) {
     try {
       raw = parseYaml(await readFile(file, "utf8"));
     } catch (err) {
-      throw new Error(`${relative(ROOT, file)}: invalid YAML — ${err.message}`);
+      throw new Error(`${relative(root, file)}: invalid YAML — ${err.message}`);
     }
     if (!raw || typeof raw !== "object") {
-      throw new Error(`${relative(ROOT, file)}: expected a YAML mapping`);
+      throw new Error(`${relative(root, file)}: expected a YAML mapping`);
     }
-    const { area, team } = locationFromPath(config.catalogRoot, file);
+    const { area, team } = locationFromPath(root, config.catalogRoot, file);
     entries.push({
       ...raw,
       kind: raw.kind ?? (Array.isArray(raw.dependencies) ? "pack" : "plugin"),
-      _file: relative(ROOT, file),
+      _file: relative(root, file),
       _area: area,
       _team: team,
     });
   }
   return entries;
+}
+
+/**
+ * An entry is external when it declares its own `source` object instead of shipping content
+ * under plugins/. External content is not reviewed by this repository's CI, so I2 requires it
+ * to be pinned to a commit sha (ADR-0007).
+ */
+export function isExternal(entry) {
+  return entry.source != null && typeof entry.source === "object";
 }
 
 /** The directory holding an entry's plugin content, relative to the repo root. */
@@ -91,7 +114,7 @@ export function toMarketplaceEntry(config, entry) {
   const out = {
     name: entry.name,
     description: entry.description,
-    source: `./${config.pluginsRoot}/${entry.name}`,
+    source: isExternal(entry) ? entry.source : `./${config.pluginsRoot}/${entry.name}`,
     category: entry.category,
   };
   // `claude plugin tag` refuses to tag a release unless plugin.json and the marketplace

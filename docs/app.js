@@ -108,6 +108,23 @@ function tag(text, cls = "") {
   return s;
 }
 
+/**
+ * Days since the owning team last confirmed the artifact is current, or null (ADR-0012).
+ * Shown on the card because the person deciding whether to adopt something is exactly the
+ * person who should know it has not been looked at in a year.
+ */
+function reviewAgeDays(a) {
+  if (!a.last_reviewed) return null;
+  return Math.floor((Date.now() - Date.parse(`${a.last_reviewed}T00:00:00Z`)) / 86400000);
+}
+
+function isStale(a) {
+  const limit = state.marketplace.reviewMaxAgeDays;
+  if (!limit || a.maturity === "deprecated") return false;
+  const age = reviewAgeDays(a);
+  return age === null || age > limit;
+}
+
 function render() {
   const rows = visible();
   const list = el("results");
@@ -139,6 +156,7 @@ function render() {
     if (a.owner_team) meta.append(tag(`@${a.owner_team}`));
     if (a.category) meta.append(tag(a.category));
     for (const t of a.tools) meta.append(tag(t));
+    if (isStale(a)) meta.append(tag("unreviewed", "stale"));
 
     li.append(head, desc, meta);
     li.addEventListener("click", () => openDetail(a));
@@ -238,13 +256,23 @@ function openDetail(a) {
   const h3meta = document.createElement("h3");
   h3meta.textContent = "Details";
   const dl = document.createElement("dl");
+  const age = reviewAgeDays(a);
   const rows = [
     ["Owner", a.owner_team ? `@${a.owner_team}` : "—"],
     ["Scope", a.scope ?? "—"],
     ["Maturity", a.maturity ?? "—"],
     ["Category", a.category ?? "—"],
     ["Tools", a.tools.join(", ") || "—"],
+    // Every surface this artifact installs, enforced against what it actually ships by
+    // invariant I11. A hook is worth seeing before you install something (ADR-0012).
+    ["Surfaces", a.artifact_types?.join(", ") || "—"],
     ["Data classification", a.data_classification ?? "—"],
+    [
+      "Last reviewed",
+      a.last_reviewed
+        ? `${a.last_reviewed}${age > 0 ? ` · ${age} day${age === 1 ? "" : "s"} ago` : ""}`
+        : "never",
+    ],
     ["Source", a.sourcePath],
   ];
   for (const [k, v] of rows) {

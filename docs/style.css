@@ -146,6 +146,8 @@ body {
 .tag.supported { color: var(--ok); }
 .tag.experimental { color: var(--warn); }
 .tag.deprecated { color: var(--danger); }
+/* Not an error — nobody has confirmed it recently. Warning colour, on purpose (ADR-0012). */
+.tag.stale { color: var(--warn); border-style: dashed; }
 
 .empty { color: var(--muted); padding: 30px 0; text-align: center; }
 

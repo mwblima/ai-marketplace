@@ -17,6 +17,7 @@ import { stringify as stringifyYaml } from "yaml";
 import {
   ROOT,
   dependencyName,
+  isExternal,
   loadCatalog,
   loadConfig,
   toMarketplaceEntry,
@@ -50,12 +51,19 @@ console.log(
 
 // ── marketplace.json ────────────────────────────────────────────────────────────
 // Sorted by name so the diff of a PR shows only what actually changed.
+//
+// `renames` is generated from marketplace.config.json, never hand-written here: it is the
+// only sanctioned way to retire a name, and invariant I1 reads it back from the committed
+// file on the base ref to decide whether a disappearing name is a migration or a break
+// (ADR-0002).
+const renames = config.marketplace.renames ?? {};
 const marketplace = {
   $schema: "https://anthropic.com/claude-code/marketplace.schema.json",
   name: config.marketplace.name,
   description: config.marketplace.description,
   owner: config.marketplace.owner,
   allowCrossMarketplaceDependenciesOn: config.marketplace.allowCrossMarketplaceDependenciesOn ?? [],
+  ...(Object.keys(renames).length ? { renames } : {}),
   plugins: [...catalog]
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((e) => toMarketplaceEntry(config, e)),
@@ -71,6 +79,10 @@ await emit(".claude-plugin/marketplace.json", marketplace);
 // marketplace entry points the client straight at plugins/<name>/ — the directory has to
 // be complete and correct in the repository.
 for (const plugin of plugins) {
+  // An external entry's content lives in another repository, pinned by sha (I2). Nothing
+  // here is ours to generate — the manifest and skills come from the pinned commit.
+  if (isExternal(plugin)) continue;
+
   const dir = join(ROOT, config.pluginsRoot, plugin.name);
   if (!existsSync(dir)) continue; // validate.mjs reports the missing directory
 
@@ -172,6 +184,25 @@ if (existsSync(join(ROOT, "CLAUDE.md"))) {
   );
 }
 
+// ── AGENTS.md ───────────────────────────────────────────────────────────────────
+// Claude Code reads CLAUDE.md, Codex and Cursor read AGENTS.md, and the content is the
+// same rules. Same reasoning as the catalog itself (ADR-0011): written once, generated
+// everywhere else. A file that merely *claims* to be generated is worse than a duplicate —
+// it tells the next person a machine is keeping it in sync when nothing is.
+const claudeMdPath = join(ROOT, "CLAUDE.md");
+if (existsSync(claudeMdPath)) {
+  const [heading, ...rest] = (await readFile(claudeMdPath, "utf8")).split("\n");
+  await emit(
+    "AGENTS.md",
+    [
+      heading,
+      "",
+      "<!-- Generated from CLAUDE.md by scripts/build.mjs. Edit CLAUDE.md instead. -->",
+      ...rest,
+    ].join("\n"),
+  );
+}
+
 // ── site index ──────────────────────────────────────────────────────────────────
 const index = {
   generatedAt: null, // intentionally omitted: a timestamp would make every build dirty
@@ -180,6 +211,9 @@ const index = {
     title: config.site.title,
     tagline: config.site.tagline,
     repoUrl: config.site.repoUrl,
+    // The site marks an artifact unreviewed past this many days, using the same limit CI
+    // warns on (ADR-0012). One number, one place.
+    reviewMaxAgeDays: config.policy.reviewMaxAgeDays ?? null,
   },
   artifacts: [...catalog]
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -199,10 +233,14 @@ const index = {
       artifact_types: e.artifact_types ?? [],
       data_classification: e.data_classification ?? null,
       superseded_by: e.superseded_by ?? null,
+      last_reviewed: e.last_reviewed ? String(e.last_reviewed) : null,
       dependencies: (e.dependencies ?? []).map((d) => dependencyName(d)),
       version: e.version ?? null,
       homepage: e.homepage ?? null,
-      sourcePath: `${config.pluginsRoot}/${e.name}`,
+      external: isExternal(e),
+      sourcePath: isExternal(e)
+        ? `${e.source.repo ?? e.source.url ?? "external"}@${(e.source.sha ?? "").slice(0, 7)}`
+        : `${config.pluginsRoot}/${e.name}`,
     })),
 };
 await emit("docs/data/index.json", index);

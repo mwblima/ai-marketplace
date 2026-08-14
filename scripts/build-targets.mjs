@@ -11,12 +11,18 @@
  * none of them is common enough in the catalog to earn that cost yet. See ADR-0004.
  *
  * Output goes to dist/, committed so a target installs by `git clone` with nothing to run.
+ *
+ * Run with --check to fail instead of writing when the committed dist/ is stale. CI uses
+ * that mode: without it, editing a SKILL.md body and forgetting to run this script leaves
+ * Codex and Cursor serving the previous version with a green build.
  */
 
-import { cp, mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { ROOT, loadCatalog, loadConfig } from "./lib/catalog.mjs";
+import { join, sep } from "node:path";
+import { ROOT, isExternal, loadCatalog, loadConfig } from "./lib/catalog.mjs";
+
+const CHECK = process.argv.includes("--check");
 
 const TARGETS = {
   codex: { skillsDir: "codex/skills", installTo: "$HOME/.agents/skills", from: "skills" },
@@ -31,12 +37,25 @@ const config = await loadConfig();
 const catalog = await loadCatalog(config);
 
 const DIST = join(ROOT, "dist");
-await rm(DIST, { recursive: true, force: true });
 
+/** Path inside dist/ -> file contents. Built in memory so --check never touches the tree. */
+const planned = new Map();
 const counts = { codex: 0, cursor: 0 };
+
+/** Every file under `dir`, as paths relative to it. Skills may ship references/ and scripts. */
+async function filesUnder(dir, prefix = "") {
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) out.push(...(await filesUnder(join(dir, entry.name), rel)));
+    else out.push(rel);
+  }
+  return out;
+}
 
 for (const entry of catalog) {
   if (entry.kind === "pack") continue; // packs are a Claude Code feature (ADR-0005)
+  if (isExternal(entry)) continue; // content is not in this repository (I2)
 
   const skillsRoot = join(ROOT, config.pluginsRoot, entry.name, "skills");
   if (!existsSync(skillsRoot)) continue;
@@ -48,9 +67,12 @@ for (const entry of catalog) {
   for (const [tool, target] of Object.entries(TARGETS)) {
     if (!(entry.tools ?? []).includes(tool)) continue;
     for (const skill of skills) {
-      const dest = join(DIST, target.skillsDir, skill);
-      await mkdir(join(DIST, target.skillsDir), { recursive: true });
-      await cp(join(skillsRoot, skill), dest, { recursive: true });
+      for (const file of await filesUnder(join(skillsRoot, skill))) {
+        planned.set(
+          `${target.skillsDir}/${skill}/${file}`,
+          await readFile(join(skillsRoot, skill, file)),
+        );
+      }
       counts[tool] += 1;
     }
   }
@@ -79,9 +101,43 @@ echo "Done. Skills are symlinked, so 'git pull' in this repository updates them 
 
 for (const [tool, target] of Object.entries(TARGETS)) {
   if (!counts[tool]) continue;
-  await writeFile(join(DIST, tool, "install.sh"), installer(target), { mode: 0o755 });
+  planned.set(`${tool}/install.sh`, Buffer.from(installer(target)));
 }
 
-console.log(
-  `Projected ${counts.codex} skill(s) to dist/codex and ${counts.cursor} to dist/cursor.`,
-);
+if (CHECK) {
+  const onDisk = existsSync(DIST)
+    ? new Set((await filesUnder(DIST)).map((f) => f.split(sep).join("/")))
+    : new Set();
+
+  const stale = [];
+  for (const [rel, content] of planned) {
+    if (!onDisk.has(rel)) {
+      stale.push(`missing  dist/${rel}`);
+      continue;
+    }
+    const current = await readFile(join(DIST, rel));
+    if (!current.equals(content)) stale.push(`differs  dist/${rel}`);
+  }
+  for (const rel of onDisk) {
+    if (!planned.has(rel)) stale.push(`orphan   dist/${rel}`);
+  }
+
+  if (stale.length) {
+    console.error(
+      `dist/ is out of date:\n${stale.map((s) => `  - ${s}`).join("\n")}\n\n` +
+        `Run \`node scripts/build-targets.mjs\` and commit the result.`,
+    );
+    process.exit(1);
+  }
+  console.log(`dist/ is up to date (${planned.size} file(s)).`);
+} else {
+  await rm(DIST, { recursive: true, force: true });
+  for (const [rel, content] of planned) {
+    const abs = join(DIST, rel);
+    await mkdir(join(abs, ".."), { recursive: true });
+    await writeFile(abs, content, rel.endsWith("install.sh") ? { mode: 0o755 } : undefined);
+  }
+  console.log(
+    `Projected ${counts.codex} skill(s) to dist/codex and ${counts.cursor} to dist/cursor.`,
+  );
+}
