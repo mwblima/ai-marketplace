@@ -38,9 +38,10 @@ takes the same pattern and closes that distance.
 | **Tools** | Claude Code | Claude Code, plus Codex and Cursor via skill projection ([ADR-0004](docs/adr/0004-skill-md-as-canonical-format.md)) |
 | **Discovery** | Inside the CLI only | A static, searchable catalog page you can link to from a wiki or onboarding doc ([ADR-0006](docs/adr/0006-static-client-side-search.md), [ADR-0008](docs/adr/0008-static-site-on-github-pages.md)) |
 | **Team bundles** | — | `pack-*` meta-plugins, so one install gives a new joiner the right set ([ADR-0005](docs/adr/0005-packs-via-native-dependencies.md)) |
-| **Quality rules** | Schema and SHA-pin validation | Those plus ownership, description quality, atomicity, tool/content coherence, dependency-graph soundness, MCP host allowlist, and release-tag enforcement |
+| **Quality rules** | Schema and SHA-pin validation | Those plus ownership, description quality, atomicity, tool/content coherence, dependency-graph soundness, MCP host allowlist, release tags, declared surfaces, closed deprecations, hook scoping, and review freshness — 14 invariants, [each with a test](tests/invariants.test.mjs) |
 | **Rollout** | — | Ready-to-apply managed settings for machine, repository, and individual scope ([ADR-0009](docs/adr/0009-distribution-via-managed-settings.md)) |
-| **Rationale** | In code review and commit history | 11 ADRs with the rejected alternatives, so an adopting company can disagree deliberately |
+| **Intake** | — | An [artifact request template](.github/ISSUE_TEMPLATE/artifact-request.yml) routed to the owning team, so the catalog learns what is missing |
+| **Rationale** | In code review and commit history | 12 ADRs with the rejected alternatives, so an adopting company can disagree deliberately |
 
 ### What this deliberately drops
 
@@ -65,24 +66,30 @@ catalog/                    ← the only thing authors edit
   company/                    company-wide artifacts     (owner: platform)
   engineering/backend/        team artifacts             (owner: backend)
   engineering/data/           team artifacts             (owner: data)
+  support/                    a non-engineering area     (owner: support)
   packs/                      curated sets               (ADR-0005)
 
-plugins/                    ← artifact content: SKILL.md, commands, MCP config
+plugins/                    ← artifact content: skills, agents, commands, hooks, MCP config
+
+tests/                      ← one test per invariant, run against synthetic repositories
 
 .claude-plugin/marketplace.json   ← GENERATED, consumed by the Claude Code client
 docs/data/index.json              ← GENERATED, powers the site search
 dist/{codex,cursor}/              ← GENERATED, projections for the other tools
 ```
 
-The catalog is the single source of truth. Everything else is generated, and CI fails if a
-generated file is out of sync — so the JSON can never be hand-edited into divergence.
+The catalog is the single source of truth. Everything else is generated, and CI fails if any
+generated file is out of sync — `marketplace.json`, the manifests, the site index, and the
+`dist/` projections alike — so nothing can be hand-edited into divergence.
 
 | Command | What it does |
 |---|---|
-| `npm run build` | Regenerates `marketplace.json`, pack manifests, and the site index |
-| `npm run validate` | Runs the guardrails (invariants I1–I9 from ADR-0007) |
-| `npm run ci` | Both, the way CI runs them |
-| `node scripts/build-targets.mjs` | Projects skills onto Codex and Cursor |
+| `npm run build` | Regenerates `marketplace.json`, manifests, `SKILL.md` frontmatter, and the site index |
+| `npm run targets` | Projects skills onto Codex and Cursor under `dist/` |
+| `npm run validate` | Runs the guardrails (invariants I1–I14 from ADR-0007) |
+| `npm test` | Tests the guardrails themselves against synthetic repositories |
+| `npm run ci` | All four, regenerating as it goes — what you run before opening a PR |
+| `npm run check` | The same checks in `--check` mode, writing nothing — what CI runs |
 
 ## Using it
 
@@ -199,9 +206,12 @@ before that can surprise anyone.
 Three layers, cheapest first (ADR-0007):
 
 1. **Schema** — required fields and enums on every catalog entry.
-2. **CI invariants** — immutable names, pinned SHAs, valid skill frontmatter, usable
-   descriptions, tool/content coherence, a sound dependency graph, real owners, allowlisted
-   MCP hosts. Seconds, blocking.
+2. **CI invariants** — immutable names, pinned SHAs, valid skill and agent frontmatter,
+   usable descriptions, tool/content coherence, a sound dependency graph, real owners,
+   allowlisted MCP hosts, release tags, declared surfaces, deprecations that point
+   somewhere, and scoped hooks. Seconds, blocking — and each one has a test in
+   [`tests/invariants.test.mjs`](tests/invariants.test.mjs), because the adoption guide tells
+   companies to change these rules.
 3. **Policy review** — [`.github/policy/prompt.md`](.github/policy/prompt.md) with a
    structured verdict in [`schema.json`](.github/policy/schema.json), covering what a script
    cannot judge: hook scope, undisclosed telemetry, whether the description matches actual
@@ -215,6 +225,13 @@ Distribution and enforcement — automatic marketplace registration, default-ena
 and restricting which marketplaces can be added at all — are covered in
 [ADR-0009](docs/adr/0009-distribution-via-managed-settings.md) with ready-to-apply files
 under [`docs/managed-settings/`](docs/managed-settings/).
+
+Two things keep the catalog from decaying once it exists (ADR-0012). Artifacts carry a
+`last_reviewed` date: past 180 days CI warns and the site marks them **unreviewed**, so the
+person deciding whether to adopt something can see nobody has looked at it in a year. And
+what an artifact *installs* is declared in the catalog, not discovered by listing
+directories — adding a hook to an existing artifact is a catalog change, reviewed by its
+owners like any other.
 
 ## Adopting it
 
