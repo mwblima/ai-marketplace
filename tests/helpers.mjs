@@ -17,6 +17,24 @@ import { dirname, join } from "node:path";
 import { stringify as stringifyYaml } from "yaml";
 import { ROOT, loadConfig } from "../scripts/lib/catalog.mjs";
 
+/**
+ * Whether git is on PATH. Three invariants (I1 immutability, I10 release tags) read git,
+ * and validate.mjs deliberately degrades to skipping them when it is absent. The tests for
+ * those have to degrade the same way: on a minimal image without git, five red tests that
+ * mean nothing are worse than five honest skips.
+ */
+export const HAS_GIT = (() => {
+  try {
+    execFileSync("git", ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+/** Marks a test as skipped, with a reason, when git is unavailable. */
+export const needsGit = { skip: HAS_GIT ? false : "git is not available on PATH" };
+
 /** Long enough to clear policy.descriptionMinLength, and shaped like a real one. */
 export const DESC =
   "Review a change against the team's engineering standards and report the defects found, " +

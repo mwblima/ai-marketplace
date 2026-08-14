@@ -8,7 +8,7 @@
     "build": "node scripts/build.mjs",
     "targets": "node scripts/build-targets.mjs",
     "validate": "node scripts/validate.mjs",
-    "test": "node --test \"tests/*.test.mjs\"",
+    "test": "node --test tests/*.test.mjs",
     "check": "node scripts/build.mjs --check && node scripts/build-targets.mjs --check && npm run validate && npm run test",
     "ci": "npm run build && npm run targets && npm run validate && npm run test",
     "serve": "npm run build && node scripts/serve.mjs"

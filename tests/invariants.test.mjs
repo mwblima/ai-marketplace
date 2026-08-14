@@ -6,13 +6,20 @@
  * the adoption guide tells them to — and without these tests a change to validate.mjs is a
  * change nobody can verify until an artifact slips through.
  *
- *   node --test tests/
+ *   npm test
+ *
+ * Run it through npm rather than by hand. The script lets the shell expand the glob and
+ * hands node a list of files, which is the only form that behaves the same across the Node
+ * versions this repository supports: `node --test tests/` works on 20 and fails on 25,
+ * `node --test "tests/*.test.mjs"` does the reverse, since node only learned to expand the
+ * pattern itself in 22. CI runs the minimum supported version, so the difference is not
+ * theoretical.
  */
 
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { validate } from "../scripts/validate.mjs";
-import { DESC, artifact, ids, makeRepo } from "./helpers.mjs";
+import { DESC, artifact, ids, makeRepo, needsGit } from "./helpers.mjs";
 
 const run = (repo, opts) => validate({ root: repo.dir, now: new Date("2026-08-13"), ...opts });
 
@@ -60,14 +67,14 @@ test("I1: two entries with the same name fail", async (t) => {
   assert.ok(ids(errors).includes("I1"), errors.join("\n"));
 });
 
-test("I1: dropping a published name without a rename fails", async (t) => {
+test("I1: dropping a published name without a rename fails", needsGit, async (t) => {
   const repo = await makeRepo(t, { artifacts: [artifact({ name: "kept" })] });
   const base = await repo.commitMarketplace([{ name: "kept" }, { name: "gone" }]);
   const { errors } = await run(repo, { baseRef: base });
   assert.match(errors.join(), /"gone" was removed/);
 });
 
-test("I1: a rename entry migrates a retired name", async (t) => {
+test("I1: a rename entry migrates a retired name", needsGit, async (t) => {
   const repo = await makeRepo(t, {
     config: { marketplace: { renames: { gone: "kept" } } },
     artifacts: [artifact({ name: "kept" })],
@@ -364,7 +371,7 @@ test("I9: an MCP host outside the allowlist fails", async (t) => {
 
 // ── I10: release tags ───────────────────────────────────────────────────────────
 
-test("I10: an untagged version is a warning on its own", async (t) => {
+test("I10: an untagged version is a warning on its own", needsGit, async (t) => {
   const repo = await makeRepo(t);
   await repo.commitMarketplace([{ name: "thing" }]);
   const { errors, warnings } = await run(repo);
@@ -372,7 +379,7 @@ test("I10: an untagged version is a warning on its own", async (t) => {
   assert.ok(ids(warnings).includes("I10"), warnings.join("\n"));
 });
 
-test("I10: an untagged version that another artifact constrains is an error", async (t) => {
+test("I10: an untagged version that another artifact constrains is an error", needsGit, async (t) => {
   const repo = await makeRepo(t, {
     artifacts: [
       artifact(),
@@ -390,7 +397,7 @@ test("I10: an untagged version that another artifact constrains is an error", as
   assert.match(errors.join(), /constrains this one by semver range/);
 });
 
-test("I10: a tagged version resolves cleanly", async (t) => {
+test("I10: a tagged version resolves cleanly", needsGit, async (t) => {
   const repo = await makeRepo(t, {
     artifacts: [
       artifact(),
