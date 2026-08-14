@@ -1,0 +1,22 @@
+# Hook + command artifact. Ships no skill, so it is Claude Code only (invariant I6):
+# hooks do not project to Codex or Cursor (ADR-0004).
+#
+# It exists in this reference catalog mainly to exercise the surfaces a skill does not:
+# I11 (declared artifact_types match what ships) and I14 (a hook is gated and its script
+# ships with the artifact). See .github/policy/example-verdict.json for the policy review.
+name: format-guard
+displayName: Format Guard
+version: 1.0.0
+description: >-
+  Run the repository's own formatter after the assistant edits a file, and only in
+  repositories that already declare one. Use it to keep generated edits consistent with the
+  project's existing formatting rules.
+category: development
+scope: company
+owner_team: platform
+maturity: supported
+last_reviewed: 2026-08-13
+data_classification: internal
+tools: [claude]
+artifact_types: [hook, command]
+keywords: [format, formatter, prettier, hook, consistency]

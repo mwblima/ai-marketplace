@@ -1,0 +1,23 @@
+# A non-engineering area, owned by a non-engineering team. Nothing in the model changes:
+# the directory routes review through CODEOWNERS (ADR-0003), the same invariants apply, and
+# the artifact appears in the same catalog as the engineering ones.
+#
+# Present in this reference repository on purpose. A catalog where every area is an
+# engineering area teaches adopters that this is a developer tool, which is the single most
+# common way an internal marketplace ends up serving one department.
+name: incident-comms
+displayName: Incident Comms
+version: 1.0.0
+description: >-
+  Draft customer-facing incident updates in the company's voice: what is affected, what is
+  being done, and when the next update comes. Use while an incident is open and customers
+  need to be told something.
+category: communication
+scope: company
+owner_team: support
+maturity: supported
+last_reviewed: 2026-08-13
+data_classification: internal
+tools: [claude, codex, cursor]
+artifact_types: [skill]
+keywords: [incident, status page, customer, communication, outage, update]

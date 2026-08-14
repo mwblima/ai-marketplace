@@ -1,0 +1,77 @@
+name: Request an artifact
+description: Ask for a skill, agent, hook, or MCP server that does not exist yet.
+title: "[request] "
+labels: ["artifact-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The catalog only knows what people publish. This is how it finds out what is
+        missing — and how a request reaches the team that would own it, rather than
+        becoming a wish in a chat thread.
+
+        **Before filing:** search the catalog. Something close enough to extend is a
+        better outcome than a second artifact that overlaps the first.
+
+  - type: textarea
+    id: task
+    attributes:
+      label: What are you doing by hand today?
+      description: >-
+        The concrete task, not the artifact you imagine. "I paste our migration checklist
+        into every deployment conversation" is a good answer; "we need a deployment agent"
+        is a solution looking for a problem.
+      placeholder: Every time I ... I have to ...
+    validations:
+      required: true
+
+  - type: input
+    id: frequency
+    attributes:
+      label: How often, and how many people?
+      description: Roughly. It is the difference between an artifact and a saved prompt.
+      placeholder: "A few times a week, most of the backend team"
+    validations:
+      required: true
+
+  - type: textarea
+    id: existing
+    attributes:
+      label: What do you use for it now?
+      description: >-
+        A local prompt file, a wiki page, a colleague you ask. Paste it if you have it —
+        an artifact that starts from something real is the one that gets adopted.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: owner
+    attributes:
+      label: Which team would own it?
+      description: >-
+        Ownership means being paged about it, not having written it. If you are unsure,
+        pick Platform and it gets routed.
+      options:
+        - platform
+        - backend
+        - data
+        - support
+        - not sure
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Data it would touch
+      options:
+        - label: Reads or writes customer data
+        - label: Needs an internal system it does not already have access to (MCP server, API)
+        - label: Would run automatically rather than when asked (a hook)
+
+  - type: markdown
+    attributes:
+      value: |
+        The owning team triages this. Possible outcomes: it gets built, it gets folded into
+        an existing artifact, or it gets declined with a reason — a declined request with a
+        recorded reason is still a better outcome than an unanswered one.

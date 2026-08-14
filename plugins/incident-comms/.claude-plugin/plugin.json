@@ -1,0 +1,9 @@
+{
+  "name": "incident-comms",
+  "version": "1.0.0",
+  "description": "Draft customer-facing incident updates in the company's voice: what is affected, what is being done, and when the next update comes. Use while an incident is open and customers need to be told something.",
+  "author": {
+    "name": "Customer Support",
+    "email": "support@acme.example"
+  }
+}

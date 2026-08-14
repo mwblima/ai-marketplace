@@ -1,0 +1,19 @@
+# Three surfaces in one artifact, all serving one purpose (I5): the skill is the entry
+# point, the agent is the long-running investigation, the MCP server is where runbooks
+# actually live. The host must be on policy.allowedMcpHosts — invariant I9.
+name: runbook-search
+displayName: Runbook Search
+version: 1.0.0
+description: >-
+  Find and apply the company's operational runbooks during an incident, using the internal
+  runbook MCP server. Use when a service is degraded and you need the documented procedure
+  rather than an improvised one.
+category: operations
+scope: company
+owner_team: platform
+maturity: supported
+last_reviewed: 2026-08-13
+data_classification: internal
+tools: [claude]
+artifact_types: [skill, agent, mcp]
+keywords: [runbook, incident, oncall, operations, sre, procedure]
