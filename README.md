@@ -10,7 +10,46 @@ validator, and a static page.
 
 > This repository is a **public reference model** with fictional example artifacts. A company
 > adopting it will run it **private**. Every place that changes says so — see
-> [Adopting this privately](#adopting-this-privately).
+> [Adopting it](#adopting-it).
+
+## Credit and origin
+
+This project is built on, and directly inspired by, Anthropic's official plugin marketplace:
+**[anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official)**.
+
+That repository is where the pattern comes from: the `marketplace.json` catalog format, the
+fixed plugin anatomy, immutable name slugs with a `renames` migration map, SHA-pinned external
+sources, and — the part most worth stealing — expressing the security review as a versioned
+**prompt plus a JSON output schema** rather than as reviewer folklore. Read it first; it is
+the canonical reference, and this model does not replace it.
+
+What it is not, and does not try to be, is a template for a company. It is a curated public
+directory maintained by one team, so it optimizes for curating hundreds of third-party
+plugins rather than for many internal teams publishing alongside each other. This repository
+takes the same pattern and closes that distance.
+
+### What this adds
+
+| | `claude-plugins-official` | This model |
+|---|---|---|
+| **Catalog** | One `marketplace.json`, 3,994 lines, hand-edited | One YAML per artifact; the JSON is generated. Concurrent PRs from different teams do not conflict, and `CODEOWNERS` routes review by directory ([ADR-0003](docs/adr/0003-single-marketplace-modular-catalog.md)) |
+| **Org structure** | Flat, one owner | Company / area / team scopes, where the directory path *is* the ownership model |
+| **Source of truth** | Description written in the manifest, the skill, and the catalog | Written once in the catalog; manifests and `SKILL.md` frontmatter are generated ([ADR-0011](docs/adr/0011-catalog-is-the-only-definition-point.md)) |
+| **Tools** | Claude Code | Claude Code, plus Codex and Cursor via skill projection ([ADR-0004](docs/adr/0004-skill-md-as-canonical-format.md)) |
+| **Discovery** | Inside the CLI only | A static, searchable catalog page you can link to from a wiki or onboarding doc ([ADR-0006](docs/adr/0006-static-client-side-search.md), [ADR-0008](docs/adr/0008-static-site-on-github-pages.md)) |
+| **Team bundles** | — | `pack-*` meta-plugins, so one install gives a new joiner the right set ([ADR-0005](docs/adr/0005-packs-via-native-dependencies.md)) |
+| **Quality rules** | Schema and SHA-pin validation | Those plus ownership, description quality, atomicity, tool/content coherence, dependency-graph soundness, MCP host allowlist, and release-tag enforcement |
+| **Rollout** | — | Ready-to-apply managed settings for machine, repository, and individual scope ([ADR-0009](docs/adr/0009-distribution-via-managed-settings.md)) |
+| **Rationale** | In code review and commit history | 11 ADRs with the rejected alternatives, so an adopting company can disagree deliberately |
+
+### What this deliberately drops
+
+The official repo runs a nightly pipeline that refreshes third-party SHAs and automatically
+reverts entries that fail the policy scan, plus a policy scan wired to Anthropic's own
+federated identity. Both are excellent and both assume dozens of third-party sources. An
+internal catalog has none, so carrying that machinery would be cost without benefit. The
+policy is written and applied by a human, with [three documented automation
+paths](.github/policy/README.md) for when it is worth it.
 
 ## Why
 
@@ -192,3 +231,10 @@ and [ADR-0003](docs/adr/0003-single-marketplace-modular-catalog.md) (how modular
 ## License
 
 MIT.
+
+The pattern this implements originates in
+[anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official).
+No code is copied from it; what is reused is the catalog format, the plugin anatomy, and the
+idea of a security policy as a versioned prompt with a structured verdict. See
+[ADR-0002](docs/adr/0002-adopt-anthropic-marketplace-format.md) for exactly what was inherited
+and what was dropped.
