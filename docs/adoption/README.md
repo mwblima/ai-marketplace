@@ -72,10 +72,27 @@ The client reads the **committed** tree, not the working directory. Clean up wit
 
 ## 5. Turn on CI
 
-`.github/workflows/ci.yml` works as-is. Make `validate` a required status check on `main` —
-without that, the guardrails are advice rather than governance.
+`.github/workflows/ci.yml` works as-is. Make it a required status check on `main` — without
+that, the guardrails are advice rather than governance.
+
+The actions in it are pinned to commit shas with the tag in a trailing comment. Keep them
+that way: invariant I2 demands it of every external source in your catalog, and a pipeline
+that does not follow its own rule is the first thing a security reviewer will point at.
 
 `.github/workflows/pages.yml` needs a decision from step 1 before you enable it.
+
+### When you change the rules
+
+You will — the categories, the maturity levels, the MCP allowlist, the freshness limit.
+`tests/invariants.test.mjs` builds a synthetic repository per invariant and asserts the check
+fires, so `npm test` tells you whether your edit still holds:
+
+```bash
+npm test
+```
+
+Changing a rule without changing its test leaves a guardrail nobody can verify. That is how
+a catalog ends up with governance it only believes it has.
 
 ## 6. Distribute (when you have three or four artifacts)
 
@@ -89,9 +106,32 @@ the right artifacts in front of whoever clones the project.
 
 ## 7. Policy review
 
-Start with the human checklist that ships in the PR template. See
+Start with the human checklist that ships in the PR template, and read
+[`.github/policy/example-verdict.json`](../../.github/policy/example-verdict.json) — a
+completed review of the one artifact here that registers a hook — before your first one. See
 [`.github/policy/README.md`](../../.github/policy/README.md) for how to automate it later,
 and why writing the policy before automating it is the right order.
+
+## 8. Open the intake path
+
+Publishing is only half the loop. `.github/ISSUE_TEMPLATE/artifact-request.yml` is how
+someone asks for an artifact that does not exist, routed to the team that would own it.
+Edit the team dropdown to match yours.
+
+A catalog with no intake path grows only what its maintainers happen to think of, and the
+people with the best candidates — the ones already keeping a prompt in a local file — have
+nowhere to say so.
+
+## Not only for engineering
+
+`catalog/support/incident-comms.yaml` is in this reference catalog on purpose: a
+support-owned artifact, in a non-engineering area, under the same invariants and the same
+review path as the deployment tooling. Nothing in the model is engineering-specific except
+the example categories.
+
+If your first three artifacts are all developer tools, the catalog will be read as a
+developer tool. Publishing one artifact from outside engineering early costs almost nothing
+and decides how the whole thing is perceived.
 
 ## What to change and what to keep
 

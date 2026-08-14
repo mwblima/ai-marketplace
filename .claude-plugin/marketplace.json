@@ -58,6 +58,37 @@
       ]
     },
     {
+      "name": "format-guard",
+      "description": "Run the repository's own formatter after the assistant edits a file, and only in repositories that already declare one. Use it to keep generated edits consistent with the project's existing formatting rules.",
+      "source": "./plugins/format-guard",
+      "category": "development",
+      "version": "1.0.0",
+      "displayName": "Format Guard",
+      "keywords": [
+        "format",
+        "formatter",
+        "prettier",
+        "hook",
+        "consistency"
+      ]
+    },
+    {
+      "name": "incident-comms",
+      "description": "Draft customer-facing incident updates in the company's voice: what is affected, what is being done, and when the next update comes. Use while an incident is open and customers need to be told something.",
+      "source": "./plugins/incident-comms",
+      "category": "communication",
+      "version": "1.0.0",
+      "displayName": "Incident Comms",
+      "keywords": [
+        "incident",
+        "status page",
+        "customer",
+        "communication",
+        "outage",
+        "update"
+      ]
+    },
+    {
       "name": "pack-backend",
       "description": "Standard artifact set for backend engineers: code review plus the deployment workflow. Install this when you join a backend team.",
       "source": "./plugins/pack-backend",
@@ -93,6 +124,36 @@
       ],
       "dependencies": [
         "code-review"
+      ]
+    },
+    {
+      "name": "runbook-search",
+      "description": "Find and apply the company's operational runbooks during an incident, using the internal runbook MCP server. Use when a service is degraded and you need the documented procedure rather than an improvised one.",
+      "source": "./plugins/runbook-search",
+      "category": "operations",
+      "version": "1.0.0",
+      "displayName": "Runbook Search",
+      "keywords": [
+        "runbook",
+        "incident",
+        "oncall",
+        "operations",
+        "sre",
+        "procedure"
+      ]
+    },
+    {
+      "name": "sql-lint",
+      "description": "Check raw SQL against the data team's naming and formatting conventions. Superseded by dbt-helper, which covers the same conventions plus tests and documentation for the models the SQL belongs to.",
+      "source": "./plugins/sql-lint",
+      "category": "data",
+      "version": "1.2.0",
+      "displayName": "SQL Lint",
+      "keywords": [
+        "sql",
+        "lint",
+        "conventions",
+        "deprecated"
       ]
     }
   ]

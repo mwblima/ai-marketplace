@@ -4,7 +4,8 @@
     "name": "acme",
     "title": "Acme AI Marketplace",
     "tagline": "Skills, agents and MCP servers, versioned and shared across the company.",
-    "repoUrl": "https://github.com/acme/ai-marketplace"
+    "repoUrl": "https://github.com/acme/ai-marketplace",
+    "reviewMaxAgeDays": 180
   },
   "artifacts": [
     {
@@ -36,9 +37,11 @@
       ],
       "data_classification": "internal",
       "superseded_by": null,
+      "last_reviewed": "2026-08-13",
       "dependencies": [],
       "version": "1.0.0",
       "homepage": null,
+      "external": false,
       "sourcePath": "plugins/code-review"
     },
     {
@@ -70,9 +73,11 @@
       ],
       "data_classification": "internal",
       "superseded_by": null,
+      "last_reviewed": "2026-08-13",
       "dependencies": [],
       "version": "0.2.0",
       "homepage": null,
+      "external": false,
       "sourcePath": "plugins/dbt-helper"
     },
     {
@@ -105,10 +110,82 @@
       ],
       "data_classification": "internal",
       "superseded_by": null,
+      "last_reviewed": "2026-08-13",
       "dependencies": [],
       "version": "2.1.0",
       "homepage": null,
+      "external": false,
       "sourcePath": "plugins/deploy-kit"
+    },
+    {
+      "name": "format-guard",
+      "displayName": "Format Guard",
+      "description": "Run the repository's own formatter after the assistant edits a file, and only in repositories that already declare one. Use it to keep generated edits consistent with the project's existing formatting rules.",
+      "category": "development",
+      "kind": "plugin",
+      "scope": "company",
+      "area": "company",
+      "team": null,
+      "owner_team": "platform",
+      "maturity": "supported",
+      "tools": [
+        "claude"
+      ],
+      "keywords": [
+        "format",
+        "formatter",
+        "prettier",
+        "hook",
+        "consistency"
+      ],
+      "artifact_types": [
+        "hook",
+        "command"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "last_reviewed": "2026-08-13",
+      "dependencies": [],
+      "version": "1.0.0",
+      "homepage": null,
+      "external": false,
+      "sourcePath": "plugins/format-guard"
+    },
+    {
+      "name": "incident-comms",
+      "displayName": "Incident Comms",
+      "description": "Draft customer-facing incident updates in the company's voice: what is affected, what is being done, and when the next update comes. Use while an incident is open and customers need to be told something.",
+      "category": "communication",
+      "kind": "plugin",
+      "scope": "company",
+      "area": "support",
+      "team": null,
+      "owner_team": "support",
+      "maturity": "supported",
+      "tools": [
+        "claude",
+        "codex",
+        "cursor"
+      ],
+      "keywords": [
+        "incident",
+        "status page",
+        "customer",
+        "communication",
+        "outage",
+        "update"
+      ],
+      "artifact_types": [
+        "skill"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "last_reviewed": "2026-08-13",
+      "dependencies": [],
+      "version": "1.0.0",
+      "homepage": null,
+      "external": false,
+      "sourcePath": "plugins/incident-comms"
     },
     {
       "name": "pack-backend",
@@ -133,12 +210,14 @@
       "artifact_types": [],
       "data_classification": "internal",
       "superseded_by": null,
+      "last_reviewed": "2026-08-13",
       "dependencies": [
         "code-review",
         "deploy-kit"
       ],
       "version": "1.0.0",
       "homepage": null,
+      "external": false,
       "sourcePath": "plugins/pack-backend"
     },
     {
@@ -164,12 +243,82 @@
       "artifact_types": [],
       "data_classification": "internal",
       "superseded_by": null,
+      "last_reviewed": "2026-08-13",
       "dependencies": [
         "code-review"
       ],
       "version": "1.0.0",
       "homepage": null,
+      "external": false,
       "sourcePath": "plugins/pack-onboarding"
+    },
+    {
+      "name": "runbook-search",
+      "displayName": "Runbook Search",
+      "description": "Find and apply the company's operational runbooks during an incident, using the internal runbook MCP server. Use when a service is degraded and you need the documented procedure rather than an improvised one.",
+      "category": "operations",
+      "kind": "plugin",
+      "scope": "company",
+      "area": "company",
+      "team": null,
+      "owner_team": "platform",
+      "maturity": "supported",
+      "tools": [
+        "claude"
+      ],
+      "keywords": [
+        "runbook",
+        "incident",
+        "oncall",
+        "operations",
+        "sre",
+        "procedure"
+      ],
+      "artifact_types": [
+        "skill",
+        "agent",
+        "mcp"
+      ],
+      "data_classification": "internal",
+      "superseded_by": null,
+      "last_reviewed": "2026-08-13",
+      "dependencies": [],
+      "version": "1.0.0",
+      "homepage": null,
+      "external": false,
+      "sourcePath": "plugins/runbook-search"
+    },
+    {
+      "name": "sql-lint",
+      "displayName": "SQL Lint",
+      "description": "Check raw SQL against the data team's naming and formatting conventions. Superseded by dbt-helper, which covers the same conventions plus tests and documentation for the models the SQL belongs to.",
+      "category": "data",
+      "kind": "plugin",
+      "scope": "team",
+      "area": "engineering",
+      "team": "data",
+      "owner_team": "data",
+      "maturity": "deprecated",
+      "tools": [
+        "claude"
+      ],
+      "keywords": [
+        "sql",
+        "lint",
+        "conventions",
+        "deprecated"
+      ],
+      "artifact_types": [
+        "skill"
+      ],
+      "data_classification": "internal",
+      "superseded_by": "dbt-helper",
+      "last_reviewed": null,
+      "dependencies": [],
+      "version": "1.2.0",
+      "homepage": null,
+      "external": false,
+      "sourcePath": "plugins/sql-lint"
     }
   ]
 }

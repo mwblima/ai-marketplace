@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "runbooks": {
+      "type": "http",
+      "url": "https://mcp.internal.acme.example/runbooks"
+    }
+  }
+}

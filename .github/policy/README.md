@@ -6,6 +6,13 @@ This directory holds layer 3 of the guardrails (ADR-0007): the checks a script c
 |---|---|
 | [`prompt.md`](prompt.md) | The policy itself. Written as instructions to a reviewer — human or model. |
 | [`schema.json`](schema.json) | The shape of a verdict. Every review produces this object, whoever performs it. |
+| [`example-verdict.json`](example-verdict.json) | A completed review of `plugins/format-guard/`, the artifact in this catalog that registers a hook. |
+
+Read the example before your first review. It is deliberately a review of a **hook**, not a
+skill: the fields that carry the weight — `hooks`, `has_broad_scope_hooks`,
+`may_download_additional_software` — are only exercised by an artifact that can act outside
+its own invocation, and its `_notes` record what the reviewer actually had to look at,
+including the one flag (`npx --no-install`) that decided a field.
 
 Layers 1 and 2 — schema validation and the CI invariants — run in `scripts/validate.mjs`
 and block the PR in seconds. They catch malformed entries, broken dependency graphs,

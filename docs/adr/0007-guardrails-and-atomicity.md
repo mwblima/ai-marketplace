@@ -1,6 +1,6 @@
 # ADR-0007 — Quality guardrails and artifact atomicity
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-12
 
 ## Context
@@ -24,22 +24,38 @@ Three layers, cheapest to most expensive.
 
 ### 1. Schema (blocking, instant)
 
-`schema/catalog.schema.json` validates every `catalog/**/*.yaml`. Required fields: `name`,
-`description`, `owner_team`, `scope`, `maturity`, `tools`, `category`.
+Required fields and enum membership on every `catalog/**/*.yaml`, checked at the top of
+`scripts/validate.mjs`: `name`, `description`, `owner_team`, `scope`, `maturity`, `tools`,
+`category`, and `artifact_types` for anything that is not a pack.
+
+The schema lives in code rather than in a `catalog.schema.json`, because the enums it
+validates are read from `marketplace.config.json` — the categories, teams, maturities, and
+allowlists a company edits on day one. Two files defining the same rules is exactly the
+duplication ADR-0011 exists to prevent.
 
 ### 2. CI invariants (blocking, seconds)
 
 | # | Invariant | Rationale |
 |---|---|---|
-| I1 | `name` unique across the catalog and immutable across commits | Renaming breaks installs (ADR-0002) |
-| I2 | External sources carry a pinned `sha` | `ref: main` changes content without review |
-| I3 | `SKILL.md` frontmatter has valid `name` and `description` | Without it the artifact cannot be triggered |
+| I1 | `name` unique, immutable, and retired only through `marketplace.renames` | Renaming breaks installs (ADR-0002) |
+| I2 | External sources pin a 40-character `sha` and sit on `policy.allowedPluginRepos` | `ref: main` changes content after review; an unlisted repo was never reviewed |
+| I3 | `SKILL.md` and agent frontmatter have valid `name` and `description` | Without it the artifact cannot be triggered |
 | I4 | `description` is 40–400 characters and states *when to use* | It is the search field (ADR-0006) and the activation trigger |
 | I5 | One artifact, one purpose (see atomicity below) | Composition only works if the pieces are small |
 | I6 | `tools:` consistent with content (declares `codex` but uses hooks → fail) | Prevents broken projections (ADR-0004) |
 | I7 | `dependencies` graph has no cycles, no missing targets, no `deprecated` targets | Prevents broken packs (ADR-0005) |
 | I8 | `owner_team` exists in `CODEOWNERS` | An artifact without an owner is a dead artifact |
 | I9 | MCP servers point at hosts on the internal allowlist | Data guardrail |
+| I10 | A declared `version` has a matching release tag | An unresolvable semver constraint fails silently (ADR-0010) |
+| I11 | `artifact_types` matches the surfaces actually shipped, in both directions | An undeclared hook is reach nobody reviewed (ADR-0012) |
+| I12 | `superseded_by` names a live artifact | A deprecation pointing nowhere strands its users (ADR-0010) |
+| I13 | `last_reviewed` is present and inside `policy.reviewMaxAgeDays` — warning | Catalogs die of abandonment, not of bad artifacts (ADR-0012) |
+| I14 | Hooks are declared in `hooks/hooks.json`, carry a `matcher`, and ship the file they run | The one surface that runs without being asked (ADR-0012) |
+
+Every invariant has a test in `tests/invariants.test.mjs` that builds a synthetic repository
+violating it and asserts the guardrail fires. That suite is not incidental: the adoption
+guide tells companies to change these rules, and a rule nobody can verify after changing is
+a rule that quietly stops holding.
 
 ### 3. Policy review (blocking, minutes)
 

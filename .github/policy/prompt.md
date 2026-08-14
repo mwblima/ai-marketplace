@@ -39,6 +39,12 @@ Check for:
 
 ## Part 2 — Hook scope and disclosure
 
+CI has already checked the mechanics (invariants I11 and I14): the artifact declares `hook`
+in `artifact_types`, every `PreToolUse`/`PostToolUse` entry carries a `matcher`, and the
+script each hook runs actually ships. Do not re-verify those. Your job is the part a script
+cannot do — whether the scope those mechanics express is *justified by the artifact's stated
+purpose*.
+
 Enumerate every hook the artifact registers, and read the source file each one points at.
 For each hook, answer:
 

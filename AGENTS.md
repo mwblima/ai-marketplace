@@ -28,7 +28,28 @@ If a description or version needs to change, change the catalog entry and run `n
 
 `name` is the slug people have installed. Renaming it breaks every existing install. To
 change the label, set `displayName`. To retire an artifact, set `maturity: deprecated` and
-`superseded_by` — never delete the entry.
+`superseded_by`, pointing at an artifact that exists and is not itself deprecated (I12) —
+never delete the entry.
+
+If a name genuinely has to disappear, add `old: new` to `marketplace.renames` in
+`marketplace.config.json` in the same PR that removes it. That map is what migrates existing
+installs, and I1 fails the build without it.
+
+## Declare every surface an artifact ships
+
+`artifact_types` lists what the plugin installs: `skill`, `agent`, `command`, `hook`, `mcp`.
+Invariant I11 checks it in both directions — declaring something you do not ship fails, and
+**shipping something you did not declare fails**. A hook that appears without a catalog
+change is reach nobody reviewed (ADR-0012).
+
+Hooks additionally have to be real (I14): a `hooks/hooks.json`, a `matcher` on every
+`PreToolUse`/`PostToolUse` entry, and the script they invoke shipped with the artifact.
+
+## Keep `last_reviewed` honest
+
+`last_reviewed` is the day the owning team last confirmed the artifact is still correct.
+CI warns past 180 days and the site marks it "unreviewed". Bumping the date without
+rereading the artifact defeats the only mechanism that notices abandonment.
 
 ## Descriptions do three jobs
 
@@ -52,7 +73,14 @@ If the description needs "and" to list distinct jobs, it is two artifacts.
 npm run ci
 ```
 
-It regenerates everything and runs all guardrails. A change is not done until it is clean.
+It regenerates everything, runs all guardrails, and runs the guardrail tests. A change is
+not done until it is clean.
+
+## Changing a guardrail means changing its test
+
+Every invariant has a test in `tests/invariants.test.mjs` that builds a synthetic repository
+violating it and asserts the check fires. Adding, relaxing, or removing a rule in
+`scripts/validate.mjs` without touching that suite leaves a rule nobody can verify.
 
 ## Structural changes need an ADR
 

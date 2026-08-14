@@ -3,6 +3,11 @@ name: CI
 # Deterministic guardrails (ADR-0007, layers 1 and 2). Everything here runs in seconds.
 # What cannot be checked mechanically lives in .github/policy/ and is reviewed by a human
 # against the structured checklist in the PR template.
+#
+# Actions are pinned to a commit sha, not a tag. Invariant I2 requires that of every
+# external source in the catalog; a governance repository that does not hold its own
+# pipeline to the same rule is teaching the opposite of what it documents. The comment
+# after each sha is the tag it resolved from, so upgrades stay reviewable.
 
 on:
   pull_request:
@@ -16,12 +21,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          # Full history so the name-immutability check (I1) can diff against the base ref.
+          # Full history and tags: the name-immutability check (I1) diffs against the base
+          # ref, and the release-tag check (I10) reads `{plugin}--v{version}` tags.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
@@ -33,10 +39,17 @@ jobs:
       - name: Check generated files are up to date
         run: node scripts/build.mjs --check
 
+      # Same rule for the Codex and Cursor projections. Without this, editing a SKILL.md
+      # body and forgetting to regenerate leaves dist/ serving the previous version.
+      - name: Check multi-tool projection is up to date
+        run: node scripts/build-targets.mjs --check
+
       - name: Validate catalog and artifacts
         run: node scripts/validate.mjs
         env:
           BASE_REF: ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
 
-      - name: Check multi-tool projection builds
-        run: node scripts/build-targets.mjs
+      # The guardrails themselves. An adopting company will change these rules; without
+      # the suite, a change to validate.mjs is unverifiable until an artifact slips through.
+      - name: Test the guardrails
+        run: npm test

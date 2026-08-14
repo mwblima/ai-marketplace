@@ -9,6 +9,7 @@ category: deployment
 scope: team
 owner_team: backend
 maturity: supported
+last_reviewed: 2026-08-13
 data_classification: internal
 tools: [claude, codex, cursor]
 artifact_types: [skill]

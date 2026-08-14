@@ -1,6 +1,6 @@
 # ADR-0008 — Static site on GitHub Pages, no framework
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-12
 
 ## Context

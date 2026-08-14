@@ -6,10 +6,11 @@
   "description": "A governance model for sharing AI artifacts (skills, agents, MCP servers, hooks) across a company.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "validate": "node scripts/validate.mjs",
-    "check": "node scripts/build.mjs --check && node scripts/validate.mjs",
     "targets": "node scripts/build-targets.mjs",
-    "ci": "npm run build && npm run validate && npm run targets",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/build.mjs --check && node scripts/build-targets.mjs --check && npm run validate && npm run test",
+    "ci": "npm run build && npm run targets && npm run validate && npm run test",
     "serve": "npm run build && node scripts/serve.mjs"
   },
   "dependencies": {

@@ -1,0 +1,9 @@
+{
+  "name": "format-guard",
+  "version": "1.0.0",
+  "description": "Run the repository's own formatter after the assistant edits a file, and only in repositories that already declare one. Use it to keep generated edits consistent with the project's existing formatting rules.",
+  "author": {
+    "name": "Platform Engineering",
+    "email": "platform@acme.example"
+  }
+}

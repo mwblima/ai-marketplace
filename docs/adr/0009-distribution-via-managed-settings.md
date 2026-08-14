@@ -1,6 +1,6 @@
 # ADR-0009 — Distribution and enforcement via managed settings
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-12
 
 ## Context

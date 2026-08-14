@@ -1,0 +1,9 @@
+{
+  "name": "sql-lint",
+  "version": "1.2.0",
+  "description": "Check raw SQL against the data team's naming and formatting conventions. Superseded by dbt-helper, which covers the same conventions plus tests and documentation for the models the SQL belongs to.",
+  "author": {
+    "name": "Data Engineering",
+    "email": "data@acme.example"
+  }
+}

@@ -47,6 +47,10 @@ Reviewed against `.github/policy/prompt.md`. Verdict shape is `.github/policy/sc
 - [ ] The artifact does **one** thing. If the description needs "and" to list distinct
       jobs, it is two artifacts (ADR-0007).
 - [ ] `owner_team` is a team that can be paged about this, and it appears in `CODEOWNERS`.
+- [ ] `artifact_types` lists **every** surface this installs — skill, agent, command, hook,
+      MCP. A hook nobody expected is the failure mode this exists to prevent (ADR-0012).
+- [ ] `last_reviewed` reflects a review that actually happened, not today's date because CI
+      asked for one (ADR-0012).
 - [ ] Logic is expressed as a skill where possible. A skill is portable across all three
       tools and opt-in; a hook runs in one tool, globally, and invisibly (ADR-0004).
 - [ ] If `version` changed, a release tag will be pushed after merge:

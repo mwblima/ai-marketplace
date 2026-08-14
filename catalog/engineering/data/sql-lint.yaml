@@ -1,0 +1,20 @@
+# Deprecation is a state, not a deletion (ADR-0010). The entry stays, the artifact stays
+# installable, and `superseded_by` tells every existing user where to go. Invariant I12
+# checks that the target exists and is not itself deprecated; I7 refuses to let any pack
+# take a new dependency on this one.
+name: sql-lint
+displayName: SQL Lint
+version: 1.2.0
+description: >-
+  Check raw SQL against the data team's naming and formatting conventions. Superseded by
+  dbt-helper, which covers the same conventions plus tests and documentation for the models
+  the SQL belongs to.
+category: data
+scope: team
+owner_team: data
+maturity: deprecated
+superseded_by: dbt-helper
+data_classification: internal
+tools: [claude]
+artifact_types: [skill]
+keywords: [sql, lint, conventions, deprecated]

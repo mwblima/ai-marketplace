@@ -124,6 +124,7 @@ category: development
 scope: team
 owner_team: backend
 maturity: experimental
+last_reviewed: 2026-08-13
 data_classification: internal
 tools: [claude, codex, cursor]
 artifact_types: [skill]
@@ -136,7 +137,7 @@ keywords: [words, people, would, search, for]
 |---|---|---|---|
 | `name` | yes | lowercase kebab-case | **Immutable.** It is what people type in `install <name>@acme`. Must match the directory under `plugins/`. |
 | `description` | yes | 40–400 chars | See [Writing the description](#writing-the-description). |
-| `category` | yes | `development`, `productivity`, `security`, `data`, `monitoring`, `design`, `testing`, `deployment` | Extend the list in `marketplace.config.json` if you truly need a new one. |
+| `category` | yes | `development`, `productivity`, `security`, `data`, `monitoring`, `design`, `testing`, `deployment`, `operations`, `communication` | Extend the list in `marketplace.config.json` if you truly need a new one. |
 | `scope` | yes | `company`, `area`, `team` | Should agree with where the file sits. |
 | `owner_team` | yes | a team in `.github/CODEOWNERS` | Must be a team that can be paged about this. |
 | `maturity` | yes | `experimental`, `supported`, `deprecated` | `experimental` relaxes description and atomicity checks to warnings. Start there. |
@@ -144,7 +145,9 @@ keywords: [words, people, would, search, for]
 | `version` | recommended | semver | Needed for release tags and for packs to constrain you. |
 | `displayName` | no | free text | Shown in the UI. The mutable label, unlike `name`. |
 | `data_classification` | no | `public`, `internal`, `confidential` | Declare the highest class of data this can touch. |
-| `artifact_types` | no | `skill`, `agent`, `mcp`, `hook`, `command`, `pack` | Documentation and site filtering. |
+| `artifact_types` | yes (not packs) | `skill`, `agent`, `command`, `hook`, `mcp` | Every surface the plugin installs. Checked against what ships, in both directions — an undeclared `hooks/` directory fails I11. |
+| `last_reviewed` | recommended | `YYYY-MM-DD` | The day your team last confirmed this is still correct. Warns past 180 days (I13) and shows as "unreviewed" on the site. |
+| `source` | external only | `{ source, repo, sha }` | For content in another repository. Must pin a 40-character `sha` and sit on `policy.allowedPluginRepos` (I2). Nothing under `plugins/` is generated for it. |
 | `keywords` | no | list of strings | Synonyms and plurals — search has no stemming, so `deploy` will not match `deploys`. |
 | `homepage` | no | URL | Internal docs for this artifact. |
 | `dependencies` | packs only | see [Adding a pack](#adding-a-pack) | Presence of this field makes the entry a pack. |
@@ -306,8 +309,17 @@ is thinking about your artifact. Policy review is strict about them:
   telemetry is still telemetry.
 - **Do not declare `codex` or `cursor` in `tools:`.** Hooks do not project; invariant I6
   rejects the combination rather than shipping a fraction of your artifact.
+- **Declare it.** `artifact_types` must include `hook`, or I11 fails the build. The point is
+  that adding a hook shows up as a catalog change, reviewed through `CODEOWNERS`.
+- **Ship what it runs.** `hooks/hooks.json`, a `matcher` on every `PreToolUse`/`PostToolUse`
+  entry, and the script itself under `${CLAUDE_PLUGIN_ROOT}` — I14 checks all three.
 
 Before writing one, check whether a skill would do. Usually it would.
+
+[`plugins/format-guard/`](plugins/format-guard/) is a worked example: a gated `PostToolUse`
+hook, a command alongside it, and a completed policy verdict in
+[`.github/policy/example-verdict.json`](.github/policy/example-verdict.json) showing what a
+reviewer actually looked at.
 
 ---
 
@@ -320,12 +332,27 @@ maturity: deprecated
 superseded_by: the-new-artifact
 ```
 
+`superseded_by` has to name an artifact that exists and is not itself deprecated — invariant
+I12 refuses a deprecation that points nowhere, because the site shows that name to everyone
+still using the old artifact.
+
 The artifact stays installable, is marked on the site, and is blocked from entering new packs.
 Delete the entry months later, after installs have drained.
+[`plugins/sql-lint/`](plugins/sql-lint/) is a worked example.
 
 **Renaming is not possible.** `name` is an immutable slug. To change the displayed label, set
-`displayName`. If a rename is genuinely unavoidable, add a `renames` entry so existing installs
-migrate ([ADR-0002](docs/adr/0002-adopt-anthropic-marketplace-format.md)).
+`displayName`. If a rename is genuinely unavoidable, map it in `marketplace.config.json`, in
+the same PR that removes the old entry:
+
+```json
+"marketplace": {
+  "renames": { "old-name": "new-name" }
+}
+```
+
+The build emits that map into `marketplace.json`, which is what migrates existing installs
+([ADR-0002](docs/adr/0002-adopt-anthropic-marketplace-format.md)). I1 fails a name that
+disappears without one, and also fails a map pointing at an artifact that does not exist.
 
 ---
 
@@ -337,8 +364,8 @@ What CI enforces, and what to do when it fires. IDs match
 | ID | Rule | Fix |
 |---|---|---|
 | `schema` | Required fields present, enum values valid | Correct the catalog entry against the field reference above |
-| `I1` | Names unique, immutable, and matching between catalog and manifest | Do not rename. Deprecate, or add a `renames` entry |
-| `I2` | External sources are SHA-pinned | Add the `sha` to the source object |
+| `I1` | Names unique, immutable, and matching between catalog and manifest | Do not rename. Deprecate, or add the name to `marketplace.renames` |
+| `I2` | External sources pin a 40-char `sha` and sit on `policy.allowedPluginRepos` | Add the `sha`, drop any `ref`/`branch`/`tag`, and get the repository allowlisted |
 | `I3` | `SKILL.md` frontmatter valid, `name` matches its directory | Run `npm run build`; do not hand-edit frontmatter |
 | `I4` | Description is 40–400 characters | Rewrite it to say what it does and when to use it. Warning only for `experimental` |
 | `I5` | One artifact, one purpose; `SKILL.md` under 500 lines | Split the artifact, or move detail into `references/` |
@@ -347,10 +374,17 @@ What CI enforces, and what to do when it fires. IDs match
 | `I8` | `owner_team` exists in `CODEOWNERS` | Use a real team, or add it to `.github/CODEOWNERS` |
 | `I9` | MCP servers point at allowlisted hosts | Use an internal host, or extend `policy.allowedMcpHosts` with security review |
 | `I10` | Declared version has a release tag | Run `claude plugin tag --push` after merge |
+| `I11` | `artifact_types` matches the surfaces shipped, in both directions | Declare the surface you ship, or remove the one you do not |
+| `I12` | `superseded_by` names a live artifact | Point it at something that exists and is not deprecated |
+| `I13` | `last_reviewed` present and under 180 days — **warning** | Reread the artifact, then set today's date. Do not bump it blind |
+| `I14` | Hooks declared in `hooks.json`, carrying a `matcher`, shipping their script | Add the matcher, or ship the file the command points at |
 
 Beyond these, [`.github/policy/prompt.md`](.github/policy/prompt.md) covers what scripts
 cannot judge: hook scope, undisclosed telemetry, whether the description matches actual
 behavior, and whether the declared data classification is accurate.
+
+Every one of these has a test in [`tests/invariants.test.mjs`](tests/invariants.test.mjs).
+If you are unsure what a rule actually does, the test for it is the shortest answer.
 
 ---
 
@@ -359,3 +393,14 @@ behavior, and whether the declared data classification is accurate.
 Schema, directory layout, pipeline, or artifact format changes need an ADR first. Read
 [`docs/adr/README.md`](docs/adr/README.md), then add a numbered file and reference it in your
 PR. An accepted ADR is immutable — to change a decision, supersede it with a new one.
+
+Changing a guardrail also means changing its test. `tests/invariants.test.mjs` builds a
+synthetic repository per invariant and asserts the check fires:
+
+```bash
+npm test
+```
+
+Add, relax, or remove a rule in `scripts/validate.mjs` and the suite has to move with it.
+This is the part that makes the model safe to adapt — an invariant nobody can verify after
+editing is documentation, not governance.
