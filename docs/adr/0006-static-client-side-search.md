@@ -1,6 +1,6 @@
 # ADR-0006 — Name and description search via a static client-side index
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-08-12
 
 ## Context

@@ -26,12 +26,13 @@ and mark the old one `Superseded by ADR-XXXX`.
 | [0003](0003-single-marketplace-modular-catalog.md) | Single marketplace, modular catalog, multi-marketplace as an exit | Accepted |
 | [0004](0004-skill-md-as-canonical-format.md) | `SKILL.md` as the canonical format, projected to Codex and Cursor | Accepted |
 | [0005](0005-packs-via-native-dependencies.md) | Plugin packs via native `dependencies` | Accepted |
-| [0006](0006-static-client-side-search.md) | Name and description search via a static client-side index | Proposed |
-| [0007](0007-guardrails-and-atomicity.md) | Quality guardrails and artifact atomicity | Proposed |
-| [0008](0008-static-site-on-github-pages.md) | Static site on GitHub Pages, no framework | Proposed |
-| [0009](0009-distribution-via-managed-settings.md) | Distribution and enforcement via managed settings | Proposed |
+| [0006](0006-static-client-side-search.md) | Name and description search via a static client-side index | Accepted |
+| [0007](0007-guardrails-and-atomicity.md) | Quality guardrails and artifact atomicity | Accepted |
+| [0008](0008-static-site-on-github-pages.md) | Static site on GitHub Pages, no framework | Accepted |
+| [0009](0009-distribution-via-managed-settings.md) | Distribution and enforcement via managed settings | Accepted |
 | [0010](0010-versioning-and-releases.md) | Versioning, release tags, and SHA pinning | Accepted |
 | [0011](0011-catalog-is-the-only-definition-point.md) | The catalog entry is the only place an artifact is defined | Accepted |
+| [0012](0012-declared-surfaces-and-reattestation.md) | Declared surfaces and periodic reattestation | Accepted |
 
 ## Note for adopters
 
