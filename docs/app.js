@@ -3,15 +3,23 @@
  * Search runs entirely client-side over data/index.json (ADR-0006).
  */
 
-const state = { all: [], marketplace: {}, query: "", facets: {} };
+const state = { all: [], marketplace: {}, query: "", facets: {}, page: 1, expanded: {} };
 
 const FACETS = [
   { key: "kind", label: "Type" },
+  { key: "artifact_types", label: "Surface", multi: true },
   { key: "category", label: "Category" },
   { key: "owner_team", label: "Team" },
   { key: "tools", label: "Tool", multi: true },
   { key: "maturity", label: "Maturity" },
 ];
+
+/** Cards per page — two full rows of the grid. A catalog that outgrows one screen should
+    not scroll forever. */
+const PAGE_SIZE = 6;
+
+/** Values shown in a facet group before it collapses behind a "+N more" toggle. */
+const FACET_LIMIT = 6;
 
 const el = (id) => document.getElementById(id);
 
@@ -48,16 +56,23 @@ function score(artifact, terms) {
   return total;
 }
 
-function visible() {
-  const terms = norm(state.query).split(/\s+/).filter(Boolean);
+function matchesFacets(a, exceptKey = null) {
+  return FACETS.every(({ key, multi }) => {
+    if (key === exceptKey) return true;
+    const selected = state.facets[key];
+    if (!selected) return true;
+    return multi ? (a[key] ?? []).includes(selected) : a[key] === selected;
+  });
+}
 
-  let rows = state.all.filter((a) =>
-    FACETS.every(({ key, multi }) => {
-      const selected = state.facets[key];
-      if (!selected) return true;
-      return multi ? (a[key] ?? []).includes(selected) : a[key] === selected;
-    }),
-  );
+/**
+ * Rows matching the query and every facet except `exceptKey`. Passing a key gives the counts
+ * for that facet's own chips: a category still shows how many results choosing it would
+ * yield, rather than always reading 0 once a different value is selected.
+ */
+function visible(exceptKey = null) {
+  const terms = norm(state.query).split(/\s+/).filter(Boolean);
+  let rows = state.all.filter((a) => matchesFacets(a, exceptKey));
 
   if (terms.length) {
     rows = rows
@@ -69,36 +84,106 @@ function visible() {
   return rows;
 }
 
+/** Any change to the result set starts over at page 1, so the view is never out of range. */
+function update() {
+  state.page = 1;
+  render();
+}
+
+function activeFilterCount() {
+  return FACETS.filter(({ key }) => state.facets[key]).length;
+}
+
 function renderFacets() {
   const box = el("facets");
   box.innerHTML = "";
 
   for (const { key, label, multi } of FACETS) {
-    const values = new Set();
-    for (const a of state.all) {
-      if (multi) (a[key] ?? []).forEach((v) => values.add(v));
-      else if (a[key]) values.add(a[key]);
+    // Count against everything else, so a chip reads as "picking this gives N results".
+    const pool = visible(key);
+    const counts = new Map();
+    for (const a of pool) {
+      const values = multi ? (a[key] ?? []) : a[key] ? [a[key]] : [];
+      for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
     }
-    if (values.size < 2) continue;
+
+    const selected = state.facets[key];
+    // A value that no longer matches anything still has to be shown while it is selected —
+    // otherwise the chip that produced an empty result set disappears and cannot be undone.
+    if (selected && !counts.has(selected)) counts.set(selected, 0);
+    // A facet with a single option is not a choice, so it is hidden — unless it is the one
+    // holding the current selection, which would otherwise leave an empty result set with
+    // no chip to click back off.
+    if (counts.size < 2 && !selected) continue;
+
+    const values = [...counts.keys()].sort(
+      (x, y) => counts.get(y) - counts.get(x) || x.localeCompare(y),
+    );
+    const expanded = state.expanded[key] || values.length <= FACET_LIMIT + 1;
+    const shown = expanded ? values : values.slice(0, FACET_LIMIT);
+    if (selected && !shown.includes(selected)) shown.unshift(selected);
 
     const group = document.createElement("div");
     group.className = "facet-group";
-    group.innerHTML = `<span class="facet-label">${label}</span>`;
+    const name = document.createElement("span");
+    name.className = "facet-label";
+    name.textContent = label;
+    group.append(name);
 
-    for (const value of [...values].sort()) {
+    for (const value of shown) {
       const chip = document.createElement("button");
       chip.className = "chip";
       chip.type = "button";
-      chip.textContent = value;
-      chip.setAttribute("aria-pressed", String(state.facets[key] === value));
+      chip.setAttribute("aria-pressed", String(selected === value));
+      chip.append(document.createTextNode(value));
+      const n = document.createElement("span");
+      n.className = "chip-count";
+      n.textContent = counts.get(value);
+      chip.append(n);
       chip.addEventListener("click", () => {
-        state.facets[key] = state.facets[key] === value ? null : value;
-        render();
+        state.facets[key] = selected === value ? null : value;
+        update();
       });
       group.append(chip);
     }
+
+    if (!expanded) {
+      const more = document.createElement("button");
+      more.className = "chip chip-more";
+      more.type = "button";
+      more.textContent = `+${values.length - shown.length} more`;
+      more.addEventListener("click", () => {
+        state.expanded[key] = true;
+        renderFacets();
+      });
+      group.append(more);
+    }
     box.append(group);
   }
+
+  if (activeFilterCount() || state.query) {
+    const clear = document.createElement("button");
+    clear.className = "clear-filters";
+    clear.type = "button";
+    clear.textContent = "Clear filters";
+    clear.addEventListener("click", () => {
+      state.facets = {};
+      state.query = "";
+      el("q").value = "";
+      update();
+    });
+    box.append(clear);
+  }
+}
+
+/**
+ * The narrow-screen disclosure for the facet block. The button is hidden by CSS on wide
+ * screens, where the filters are always open; the count is what makes a collapsed block
+ * honest about hiding an active filter.
+ */
+function renderFilterToggle() {
+  const n = activeFilterCount();
+  el("filter-toggle").textContent = n ? `Filters · ${n} active` : "Filters";
 }
 
 function tag(text, cls = "") {
@@ -125,48 +210,114 @@ function isStale(a) {
   return age === null || age > limit;
 }
 
+function card(a) {
+  const li = document.createElement("li");
+  li.className = `card${a.kind === "pack" ? " is-pack" : ""}`;
+  li.tabIndex = 0;
+
+  const head = document.createElement("div");
+  head.className = "card-head";
+  const name = document.createElement("span");
+  name.className = "card-name";
+  name.textContent = a.displayName;
+  const slug = document.createElement("span");
+  slug.className = "card-slug";
+  slug.textContent = a.name;
+  head.append(name, slug);
+
+  const desc = document.createElement("p");
+  desc.className = "card-desc";
+  desc.textContent = a.description;
+
+  // Surfaces first: what an install actually puts on your machine is the thing worth
+  // seeing before anything else on the card (ADR-0012).
+  const surfaces = document.createElement("div");
+  surfaces.className = "meta";
+  if (a.kind === "pack") surfaces.append(tag(`pack · ${a.dependencies.length} artifacts`, "pack"));
+  for (const s of a.artifact_types ?? []) surfaces.append(tag(s, "surface"));
+  if (a.maturity && a.maturity !== "supported") surfaces.append(tag(a.maturity, a.maturity));
+  if (isStale(a)) surfaces.append(tag("unreviewed", "stale"));
+
+  const foot = document.createElement("div");
+  foot.className = "card-foot";
+  foot.textContent = [a.owner_team && `@${a.owner_team}`, a.category, a.tools.join(" · ")]
+    .filter(Boolean)
+    .join("  ·  ");
+
+  li.append(head, desc, surfaces, foot);
+  li.addEventListener("click", () => openDetail(a));
+  li.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openDetail(a);
+    }
+  });
+  return li;
+}
+
+function renderPager(total, pages) {
+  const nav = el("pager");
+  nav.innerHTML = "";
+  nav.hidden = pages <= 1;
+  if (pages <= 1) return;
+
+  const go = (page) => {
+    state.page = page;
+    render();
+    el("results").scrollIntoView({ block: "start", behavior: "smooth" });
+  };
+
+  const step = (label, page, disabled) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "page-btn";
+    b.textContent = label;
+    b.disabled = disabled;
+    if (!disabled) b.addEventListener("click", () => go(page));
+    return b;
+  };
+
+  nav.append(step("← Prev", state.page - 1, state.page === 1));
+
+  for (let p = 1; p <= pages; p++) {
+    // Always the first, last, and current page's neighbours; the rest collapse to an ellipsis
+    // so a hundred artifacts do not produce a row of thirty buttons.
+    const near = Math.abs(p - state.page) <= 1 || p === 1 || p === pages;
+    if (!near) {
+      if (nav.lastElementChild?.className !== "page-gap") {
+        const gap = document.createElement("span");
+        gap.className = "page-gap";
+        gap.textContent = "…";
+        nav.append(gap);
+      }
+      continue;
+    }
+    const b = step(String(p), p, false);
+    if (p === state.page) {
+      b.classList.add("is-current");
+      b.setAttribute("aria-current", "page");
+    }
+    nav.append(b);
+  }
+
+  nav.append(step("Next →", state.page + 1, state.page === pages));
+
+  const info = document.createElement("span");
+  info.className = "page-info";
+  const first = (state.page - 1) * PAGE_SIZE + 1;
+  info.textContent = `${first}–${Math.min(state.page * PAGE_SIZE, total)} of ${total}`;
+  nav.append(info);
+}
+
 function render() {
   const rows = visible();
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), pages);
+
   const list = el("results");
   list.innerHTML = "";
-
-  for (const a of rows) {
-    const li = document.createElement("li");
-    li.className = `card${a.kind === "pack" ? " is-pack" : ""}`;
-    li.tabIndex = 0;
-
-    const head = document.createElement("div");
-    head.className = "card-head";
-    const name = document.createElement("span");
-    name.className = "card-name";
-    name.textContent = a.displayName;
-    const slug = document.createElement("span");
-    slug.className = "card-slug";
-    slug.textContent = a.name;
-    head.append(name, slug);
-
-    const desc = document.createElement("p");
-    desc.className = "card-desc";
-    desc.textContent = a.description;
-
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    if (a.kind === "pack") meta.append(tag(`pack · ${a.dependencies.length} artifacts`, "pack"));
-    if (a.maturity) meta.append(tag(a.maturity, a.maturity));
-    if (a.owner_team) meta.append(tag(`@${a.owner_team}`));
-    if (a.category) meta.append(tag(a.category));
-    for (const t of a.tools) meta.append(tag(t));
-    if (isStale(a)) meta.append(tag("unreviewed", "stale"));
-
-    li.append(head, desc, meta);
-    li.addEventListener("click", () => openDetail(a));
-    li.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openDetail(a);
-      }
-    });
-    list.append(li);
+  for (const a of rows.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE)) {
+    list.append(card(a));
   }
 
   el("empty").hidden = rows.length > 0;
@@ -175,6 +326,8 @@ function render() {
       ? `${rows.length} artifacts`
       : `${rows.length} of ${state.all.length}`;
   renderFacets();
+  renderFilterToggle();
+  renderPager(rows.length, pages);
 }
 
 function commandBlock(command) {
@@ -230,7 +383,7 @@ function openDetail(a) {
 
   if (a.tools.includes("codex") || a.tools.includes("cursor")) {
     const note = document.createElement("p");
-    note.style.cssText = "font-size:.85rem;color:var(--muted);margin:4px 0 0";
+    note.className = "hint";
     note.textContent =
       "Codex and Cursor: clone the repository and run dist/<tool>/install.sh to symlink the skill.";
     body.append(note);
@@ -286,7 +439,7 @@ function openDetail(a) {
 
   if (state.marketplace.repoUrl) {
     const link = document.createElement("p");
-    link.style.marginTop = "18px";
+    link.className = "detail-link";
     const a2 = document.createElement("a");
     a2.href = `${state.marketplace.repoUrl}/tree/main/${a.sourcePath}`;
     a2.textContent = "View source and README →";
@@ -304,6 +457,27 @@ function closeDetail() {
   el("detail").hidden = true;
 }
 
+/**
+ * Header and footer links, all derived from the single repoUrl in marketplace.config.json.
+ * When it is unset there is nowhere to send anyone, so the links are removed rather than
+ * left pointing at "#".
+ */
+function renderLinks(repoUrl) {
+  const targets = {
+    "repo-link": repoUrl,
+    "contribute-link": `${repoUrl}/blob/main/CONTRIBUTING.md`,
+    "contributing-link": `${repoUrl}/blob/main/CONTRIBUTING.md`,
+    "request-link": `${repoUrl}/issues/new?template=artifact-request.yml`,
+    "adr-link": `${repoUrl}/tree/main/docs/adr`,
+  };
+  for (const [id, href] of Object.entries(targets)) {
+    const node = el(id);
+    if (!node) continue;
+    if (repoUrl) node.href = href;
+    else node.remove();
+  }
+}
+
 async function main() {
   const res = await fetch("data/index.json");
   const data = await res.json();
@@ -314,12 +488,15 @@ async function main() {
   document.title = data.marketplace.title;
   el("site-title").textContent = data.marketplace.title;
   el("site-tagline").textContent = data.marketplace.tagline;
-  el("repo-link").href = data.marketplace.repoUrl;
-  el("adr-link").href = `${data.marketplace.repoUrl}/tree/main/docs/adr`;
+  renderLinks(data.marketplace.repoUrl);
 
   el("q").addEventListener("input", (e) => {
     state.query = e.target.value;
-    render();
+    update();
+  });
+  el("filter-toggle").addEventListener("click", (e) => {
+    const open = el("facets").classList.toggle("collapsed") === false;
+    e.currentTarget.setAttribute("aria-expanded", String(open));
   });
   el("detail-close").addEventListener("click", closeDetail);
   el("detail").addEventListener("click", (e) => {

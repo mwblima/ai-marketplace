@@ -10,10 +10,13 @@
   --muted: #6b6a67;
   --accent: #b4551f;
   --accent-soft: #f3e6dc;
+  --accent-ink: #ffffff;
   --ok: #2f6b46;
   --warn: #8a6100;
   --danger: #a03028;
-  --radius: 10px;
+  --shadow: 0 1px 2px rgba(28, 27, 26, 0.05), 0 8px 24px rgba(28, 27, 26, 0.04);
+  --shadow-lift: 0 2px 4px rgba(28, 27, 26, 0.06), 0 12px 32px rgba(28, 27, 26, 0.09);
+  --radius: 12px;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -27,9 +30,12 @@
     --muted: #a5a29a;
     --accent: #e28a5a;
     --accent-soft: #33251b;
+    --accent-ink: #1a1409;
     --ok: #7ec495;
     --warn: #d9ab52;
     --danger: #e08d84;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -42,9 +48,12 @@
   --muted: #a5a29a;
   --accent: #e28a5a;
   --accent-soft: #33251b;
+  --accent-ink: #1a1409;
   --ok: #7ec495;
   --warn: #d9ab52;
   --danger: #e08d84;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 * { box-sizing: border-box; }
@@ -54,88 +63,225 @@ body {
   background: var(--bg);
   color: var(--text);
   font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.wrap { max-width: 940px; margin: 0 auto; padding: 0 20px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
+a { color: var(--accent); }
+
+/* ── masthead ───────────────────────────────────────────────────────────── */
 .masthead {
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  padding: 30px 0 26px;
-  margin-bottom: 26px;
+  background:
+    radial-gradient(1100px 260px at 12% -40%, var(--accent-soft), transparent 70%),
+    var(--surface);
+  padding: 40px 0 34px;
+  margin-bottom: 4px;
 }
-.masthead h1 { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
-.tagline { margin: 6px 0 0; color: var(--muted); }
+.masthead-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.masthead h1 { margin: 0; font-size: 1.9rem; letter-spacing: -0.025em; }
+.tagline { margin: 8px 0 0; color: var(--muted); max-width: 56ch; }
 
-/* ── search ─────────────────────────────────────────────────────────────── */
-.search-row { display: flex; align-items: center; gap: 12px; }
+.masthead-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 550;
+  line-height: 1;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.12s, transform 0.12s, box-shadow 0.12s;
+}
+.btn:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-primary:hover { filter: brightness(1.06); }
+
+/* ── toolbar: search + facets ───────────────────────────────────────────── */
+/* Deliberately not sticky. With six facet rows the block is tall enough that pinning it
+   would eat a third of the viewport and overlap the cards it filters. Pagination, not a
+   frozen header, is what keeps the page navigable. */
+.toolbar {
+  padding: 22px 0 16px;
+  margin-bottom: 8px;
+}
+
+.search-row { display: flex; align-items: center; gap: 14px; }
 
 #q {
   flex: 1;
-  padding: 11px 14px;
+  padding: 12px 16px;
   font-size: 1rem;
   color: var(--text);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 999px;
 }
-#q:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+#q::placeholder { color: var(--muted); }
+#q:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: var(--bg);
+}
 
 .count { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
 
-/* ── facets ─────────────────────────────────────────────────────────────── */
-.facets { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 22px; }
-
-.facet-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.facet-label {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  margin-right: 2px;
-}
-
-.chip {
+/* Only ever shown on narrow screens — see the media query at the bottom of the file. */
+.filter-toggle {
+  display: none;
   font: inherit;
-  font-size: 0.82rem;
-  padding: 4px 11px;
+  font-size: 0.84rem;
+  margin-top: 14px;
+  padding: 9px 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
 }
+.filter-toggle[aria-expanded="true"] { border-color: var(--accent); }
+
+.facets {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+/* One row per dimension. With ten categories and a dozen teams, a single wrapped blob of
+   chips gives no way to tell which value belongs to which question. */
+.facet-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.facet-label {
+  flex: 0 0 74px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.chip {
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .chip:hover { border-color: var(--accent); }
 .chip[aria-pressed="true"] {
   background: var(--accent-soft);
   border-color: var(--accent);
-  color: var(--text);
   font-weight: 600;
+}
+.chip-count {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chip[aria-pressed="true"] .chip-count { color: var(--accent); }
+.chip-more { border-style: dashed; color: var(--muted); }
+
+.clear-filters {
+  align-self: flex-start;
+  margin-top: 2px;
+  margin-left: 74px;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 /* ── results ────────────────────────────────────────────────────────────── */
-.results { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  scroll-margin-top: 16px;
+}
 
 .card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 18px;
+  padding: 18px 20px 16px;
   background: var(--surface);
   cursor: pointer;
+  transition: border-color 0.12s, transform 0.12s, box-shadow 0.12s;
 }
-.card:hover { border-color: var(--accent); }
+.card:hover,
+.card:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  outline: none;
+}
 .card.is-pack { border-left: 4px solid var(--accent); }
 
-.card-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.card-name { font-weight: 650; font-size: 1.03rem; }
-.card-slug { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
-.card-desc { margin: 7px 0 11px; color: var(--text); }
+.card-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.card-name { font-weight: 650; font-size: 1.04rem; letter-spacing: -0.01em; }
+.card-slug { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+
+/* Clamped so every card in a row is the same height; the full text is one click away. */
+.card-desc {
+  margin: 8px 0 12px;
+  font-size: 0.92rem;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
+.card-foot {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
 .tag {
-  font-size: 0.72rem;
-  padding: 2px 8px;
+  font-size: 0.71rem;
+  line-height: 1.5;
+  padding: 2px 9px;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--muted);
@@ -143,25 +289,60 @@ body {
   white-space: nowrap;
 }
 .tag.pack { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+/* What the install actually puts on the machine — the reason to read the card. */
+.tag.surface { color: var(--text); font-family: var(--mono); font-size: 0.68rem; }
 .tag.supported { color: var(--ok); }
 .tag.experimental { color: var(--warn); }
 .tag.deprecated { color: var(--danger); }
 /* Not an error — nobody has confirmed it recently. Warning colour, on purpose (ADR-0012). */
 .tag.stale { color: var(--warn); border-style: dashed; }
 
-.empty { color: var(--muted); padding: 30px 0; text-align: center; }
+.empty { color: var(--muted); padding: 44px 0; text-align: center; }
+
+/* ── pagination ─────────────────────────────────────────────────────────── */
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 26px 0 10px;
+}
+.pager[hidden] { display: none; }
+
+.page-btn {
+  font: inherit;
+  font-size: 0.84rem;
+  line-height: 1;
+  min-width: 36px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--accent); }
+.page-btn:disabled { opacity: 0.4; cursor: default; }
+.page-btn.is-current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.page-gap { color: var(--muted); padding: 0 2px; }
+.page-info { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
 
 /* ── detail ─────────────────────────────────────────────────────────────── */
 .detail {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 6vh 20px;
   overflow-y: auto;
-  z-index: 10;
+  z-index: 20;
 }
 .detail[hidden] { display: none; }
 
@@ -170,9 +351,10 @@ body {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
   max-width: 660px;
   width: 100%;
-  padding: 26px 28px 30px;
+  padding: 28px 30px 32px;
 }
 
 .close {
@@ -188,17 +370,19 @@ body {
 }
 .close:hover { color: var(--text); }
 
-.detail h2 { margin: 0 0 2px; font-size: 1.3rem; }
+.detail h2 { margin: 0 0 2px; font-size: 1.35rem; letter-spacing: -0.02em; }
 .detail h3 {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--muted);
-  margin: 22px 0 8px;
+  margin: 24px 0 8px;
 }
-.detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; }
-.detail dt { color: var(--muted); font-size: 0.86rem; }
+.detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 7px 20px; margin: 0; }
+.detail dt { color: var(--muted); font-size: 0.85rem; }
 .detail dd { margin: 0; font-size: 0.9rem; }
+.detail .hint { font-size: 0.85rem; color: var(--muted); margin: 4px 0 0; }
+.detail-link { margin-top: 20px; }
 
 pre.cmd {
   position: relative;
@@ -238,17 +422,37 @@ pre.cmd {
   margin: 14px 0 0;
 }
 
+/* ── footer ─────────────────────────────────────────────────────────────── */
 .foot {
-  margin: 50px 0 34px;
-  padding-top: 18px;
+  margin-top: 60px;
   border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 22px 0;
   color: var(--muted);
   font-size: 0.85rem;
 }
-.foot a { color: var(--accent); }
+.foot-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.foot-note { margin: 0; }
+.foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
 
-@media (max-width: 560px) {
+@media (max-width: 620px) {
+  .masthead { padding: 28px 0 24px; }
+  .masthead-inner { align-items: flex-start; }
   .search-row { flex-wrap: wrap; }
+  /* Six rows of chips is taller than the phone screen: nobody should have to scroll past
+     the filters to reach the first artifact. Collapsed by default, and only here — on a
+     desktop the same markup stays open, so the class alone changes nothing. */
+  .filter-toggle { display: inline-flex; }
+  .facets.collapsed { display: none; }
+  .facet-label { flex-basis: 100%; }
+  .clear-filters { margin-left: 0; }
   .detail { padding: 0; }
   .detail-panel { border-radius: 0; min-height: 100%; }
+  .page-info { margin-left: 0; flex-basis: 100%; }
 }

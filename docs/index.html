@@ -12,30 +12,52 @@
   </head>
   <body>
     <header class="masthead">
-      <div class="wrap">
-        <h1 id="site-title">AI Marketplace</h1>
-        <p id="site-tagline" class="tagline"></p>
+      <div class="wrap masthead-inner">
+        <div class="masthead-text">
+          <h1 id="site-title">AI Marketplace</h1>
+          <p id="site-tagline" class="tagline"></p>
+        </div>
+        <nav class="masthead-actions" aria-label="Contribute">
+          <a id="contribute-link" class="btn btn-primary" href="#" target="_blank" rel="noopener">
+            Build a plugin
+          </a>
+          <a id="request-link" class="btn" href="#" target="_blank" rel="noopener">
+            Request an artifact
+          </a>
+        </nav>
       </div>
     </header>
 
     <main class="wrap">
-      <div class="search-row">
-        <input
-          id="q"
-          type="search"
-          autocomplete="off"
-          placeholder="Search by name or description…"
-          aria-label="Search artifacts"
-        />
-        <span id="count" class="count" aria-live="polite"></span>
+      <div class="toolbar">
+        <div class="search-row">
+          <input
+            id="q"
+            type="search"
+            autocomplete="off"
+            placeholder="Search by name, description or team…"
+            aria-label="Search artifacts"
+          />
+          <span id="count" class="count" aria-live="polite"></span>
+        </div>
+        <button
+          id="filter-toggle"
+          class="filter-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="facets"
+        >
+          Filters
+        </button>
+        <div id="facets" class="facets collapsed"></div>
       </div>
-
-      <div id="facets" class="facets"></div>
 
       <ul id="results" class="results"></ul>
       <p id="empty" class="empty" hidden>
         No artifact matches that search. Try a single word, or clear the filters.
       </p>
+
+      <nav id="pager" class="pager" aria-label="Pagination" hidden></nav>
     </main>
 
     <div id="detail" class="detail" hidden role="dialog" aria-modal="true" aria-labelledby="detail-title">
@@ -45,12 +67,17 @@
       </div>
     </div>
 
-    <footer class="wrap foot">
-      <p>
-        Generated from <code>catalog/</code> — never edited by hand.
-        <a id="repo-link" href="#">Repository</a> ·
-        <a id="adr-link" href="#">Architecture decisions</a>
-      </p>
+    <footer class="foot">
+      <div class="wrap foot-inner">
+        <p class="foot-note">
+          Generated from <code>catalog/</code> — never edited by hand.
+        </p>
+        <nav class="foot-links" aria-label="Repository">
+          <a id="repo-link" href="#" target="_blank" rel="noopener">Repository</a>
+          <a id="contributing-link" href="#" target="_blank" rel="noopener">Contributing</a>
+          <a id="adr-link" href="#" target="_blank" rel="noopener">Architecture decisions</a>
+        </nav>
+      </div>
     </footer>
 
     <script src="app.js" type="module"></script>

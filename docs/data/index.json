@@ -4,7 +4,7 @@
     "name": "acme",
     "title": "Acme AI Marketplace",
     "tagline": "Skills, agents and MCP servers, versioned and shared across the company.",
-    "repoUrl": "https://github.com/acme/ai-marketplace",
+    "repoUrl": "https://github.com/mwblima/ai-marketplace",
     "reviewMaxAgeDays": 180
   },
   "artifacts": [
