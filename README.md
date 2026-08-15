@@ -12,6 +12,16 @@ validator, and a static page.
 > adopting it will run it **private**. Every place that changes says so — see
 > [Adopting it](#adopting-it).
 
+## Browse the catalog
+
+**[mwblima.github.io/ai-marketplace](https://mwblima.github.io/ai-marketplace/)** — the page
+below is generated from `catalog/` on every build, and is what a person who is not going to
+read this README actually sees.
+
+[![The catalog page: search, filters by surface and team, and one card per artifact](docs/screenshot.png)](https://mwblima.github.io/ai-marketplace/)
+
+Run it locally with `npm run serve`.
+
 ## Credit and origin
 
 This project is built on, and directly inspired by, Anthropic's official plugin marketplace:
